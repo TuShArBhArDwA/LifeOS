@@ -1,8 +1,6 @@
 # LifeOS — High Level Design (HLD)
 
 > **Project:** LifeOS — AI Chief of Staff for Students  
-> **Hackathon:** iQOO AgentKit Hackathon · June 6, 2026  
-> **Track:** PS1 — Student · Agents (AgentKit)  
 > **Stack:** Next.js 16 · Clerk · Supabase · Gemini 2.0 Flash · Groq
 
 ---
@@ -32,7 +30,7 @@ Student drops a screenshot →  LifeOS returns a complete action plan in < 10 se
 
 ```mermaid
 graph TB
-    subgraph CLIENT["Client Layer (PWA — iQOO Phone)"]
+    subgraph CLIENT["Client Layer (PWA — Mobile)"]
         UI["Next.js PWA\nMobile Chrome"]
         UPLOAD["Upload Zone\nCamera · File · Text"]
         ANIM["Agent Thinking\nAnimation"]
@@ -171,7 +169,7 @@ graph LR
 
 ## 8. Phone-First Design Principles
 
-LifeOS is built for **demo on an iQOO phone**, bridged to laptop via **iQOO Office Kit**.
+LifeOS is designed mobile-first, built to run natively in a phone browser as an installable PWA.
 
 | Principle | Implementation |
 |---|---|
@@ -180,35 +178,17 @@ LifeOS is built for **demo on an iQOO phone**, bridged to laptop via **iQOO Offi
 | Safe areas | `env(safe-area-inset-*)` for notch/chin handling |
 | No-scroll key flows | Critical upload → processing → output fits one viewport |
 | PWA installable | `manifest.json` + `apple-mobile-web-app-capable` meta |
-| Dark mode default | Dark-only UI — hides imperfections on phone OLED screens |
+| Dark mode default | Dark-only UI optimised for OLED phone screens |
 
----
 
-## 9. Scoring Strategy (Hackathon)
-
-| Criteria | Weight | Our Approach |
-|---|---|---|
-| iQOO Office Kit Usage | 25% | Demo live on phone, mirror via Office Kit to laptop |
-| Phone-First Execution | 25% | PWA runs in mobile Chrome, camera capture primary input |
-| AI-Native Build | 20% | 5 Gemini+Groq agents, structured output, real-time pipeline |
-| Problem Fit | 20% | Directly solves PS1 — student agents, placement workflow |
-| Craft & Pitch | 10% | TCS NQT demo scenario, eligibility check as wow moment |
-
----
-
-## 10. Deployment Architecture
+## 9. Deployment Architecture
 
 ```mermaid
 graph TB
-    subgraph PHONE["iQOO Phone"]
+    subgraph PHONE["Mobile (PWA)"]
         CHROME["Mobile Chrome\nlifeos.vercel.app"]
         PWA["Installed PWA\nHomescreen icon"]
         CAM["Camera API\nScreenshot capture"]
-    end
-
-    subgraph LAPTOP["Laptop (Green Light)"]
-        OFFICE["iQOO Office Kit\nScreen mirroring"]
-        DEV["Dev tools\nbuild + polish"]
     end
 
     subgraph CLOUD["Cloud"]
@@ -220,7 +200,6 @@ graph TB
     end
 
     CHROME --> VERCEL
-    OFFICE --> CHROME
     VERCEL --> SB
     VERCEL --> CLERK
     VERCEL --> GEMINI

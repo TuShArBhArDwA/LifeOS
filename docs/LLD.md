@@ -57,12 +57,15 @@ lifeos/
 │   ├── HLD.md                        # This file's companion
 │   └── LLD.md                        # This file
 │
+├── scripts/
+│   ├── supabase-schema.sql           # Paste into Supabase SQL Editor
+│   └── seed-demo-data.sql            # Optional demo data for testing
+│
 ├── proxy.ts                          # Clerk auth proxy (Next.js 16)
 ├── next.config.mjs
 ├── tailwind.config.js
 ├── postcss.config.js
 ├── tsconfig.json
-├── supabase-schema.sql               # Paste into Supabase SQL Editor
 ├── .env.local                        # API keys (gitignored)
 ├── .gitignore
 └── package.json

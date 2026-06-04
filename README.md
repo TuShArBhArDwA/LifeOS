@@ -15,11 +15,7 @@
 [![Supabase](https://img.shields.io/badge/Supabase-Postgres-3ECF8E?logo=supabase)](https://supabase.com)
 [![Clerk](https://img.shields.io/badge/Clerk-Auth-6C47FF?logo=clerk)](https://clerk.com)
 [![Vercel](https://img.shields.io/badge/Deployed-Vercel-black?logo=vercel)](https://vercel.com)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-
----
-
-*Built for the **iQOO AgentKit Hackathon 2026** · Track: PS1 — Student · Agents*
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 
 </div>
 
@@ -232,21 +228,6 @@ npx vercel --prod
 ```
 
 Or connect the GitHub repo to [vercel.com](https://vercel.com) and add environment variables in the dashboard.
-
----
-
-## Hackathon Context
-
-Built for the **iQOO AgentKit Hackathon 2026**:
-
-| Detail | Info |
-|---|---|
-| Venue | COWRKS, DLF Cybercity, Gurugram |
-| Date | June 6, 2026 |
-| Format | 8-hour in-person sprint |
-| Prize Pool | INR 1,80,000 |
-| Track | PS1 — Student · Agents (AgentKit) |
-| Demo device | iQOO phone, mirrored via iQOO Office Kit |
 
 ---
 
