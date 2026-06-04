@@ -8,31 +8,31 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // LifeOS brand palette — dark, vibrant, premium
+        // LifeOS brand palette — Sleek, clean, professional Slate/Blue
         brand: {
-          50:  '#f0f4ff',
-          100: '#e0e9ff',
-          200: '#c7d6ff',
-          300: '#a4b8ff',
-          400: '#7c8eff',
-          500: '#5a63f5',  // primary
-          600: '#4445e8',
-          700: '#3533cc',
-          800: '#2c2aa6',
-          900: '#292983',
+          50:  '#eff6ff',
+          100: '#dbeafe',
+          200: '#bfdbfe',
+          300: '#93c5fd',
+          400: '#60a5fa',
+          500: '#3b82f6',  // primary steel blue
+          600: '#2563eb',
+          700: '#1d4ed8',
+          800: '#1e40af',
+          900: '#1e3a8a',
         },
         accent: {
-          yellow: '#f5c842',
-          green:  '#22d98a',
-          red:    '#ff4d6d',
-          purple: '#bf5af2',
-          orange: '#ff9f0a',
+          yellow: '#eab308',
+          green:  '#10b981',
+          red:    '#ef4444',
+          purple: '#6366f1',
+          orange: '#f97316',
         },
         surface: {
-          DEFAULT: '#0d0d14',
-          card:    '#13131f',
-          elevated:'#1a1a2e',
-          border:  '#2a2a40',
+          DEFAULT: '#09090b',  // Zinc 950
+          card:    '#18181b',  // Zinc 900
+          elevated:'#27272a',  // Zinc 800
+          border:  '#2e2e33',  // Custom zinc border
         },
       },
       fontFamily: {
@@ -56,8 +56,8 @@ module.exports = {
         slideDown: { from: { opacity: '0', transform: 'translateY(-12px)' }, to: { opacity: '1', transform: 'translateY(0)' } },
         scaleIn:   { from: { opacity: '0', transform: 'scale(0.95)' }, to: { opacity: '1', transform: 'scale(1)' } },
         pulseGlow: {
-          '0%, 100%': { boxShadow: '0 0 20px rgba(90,99,245,0.3)' },
-          '50%':      { boxShadow: '0 0 40px rgba(90,99,245,0.7)' },
+          '0%, 100%': { boxShadow: '0 0 20px rgba(59,130,246,0.15)' },
+          '50%':      { boxShadow: '0 0 35px rgba(59,130,246,0.4)' },
         },
         shimmer: {
           '0%':   { backgroundPosition: '-200% center' },
@@ -73,10 +73,10 @@ module.exports = {
         },
       },
       backgroundImage: {
-        'gradient-brand':   'linear-gradient(135deg, #5a63f5 0%, #bf5af2 100%)',
-        'gradient-surface': 'linear-gradient(180deg, #13131f 0%, #0d0d14 100%)',
-        'gradient-card':    'linear-gradient(135deg, #1a1a2e 0%, #13131f 100%)',
-        'shimmer-gradient': 'linear-gradient(90deg, transparent 0%, rgba(90,99,245,0.15) 50%, transparent 100%)',
+        'gradient-brand':   'linear-gradient(135deg, #3b82f6 0%, #10b981 100%)',
+        'gradient-surface': 'linear-gradient(180deg, #18181b 0%, #09090b 100%)',
+        'gradient-card':    'linear-gradient(135deg, #27272a 0%, #18181b 100%)',
+        'shimmer-gradient': 'linear-gradient(90deg, transparent 0%, rgba(59,130,246,0.1) 50%, transparent 100%)',
       },
       backdropBlur: { xs: '2px' },
       borderRadius: {
@@ -85,11 +85,11 @@ module.exports = {
         '4xl': '2rem',
       },
       boxShadow: {
-        'brand':  '0 0 30px rgba(90,99,245,0.25)',
-        'card':   '0 4px 24px rgba(0,0,0,0.4)',
-        'glow-green':  '0 0 20px rgba(34,217,138,0.3)',
-        'glow-yellow': '0 0 20px rgba(245,200,66,0.3)',
-        'glow-red':    '0 0 20px rgba(255,77,109,0.3)',
+        'brand':  '0 0 30px rgba(59,130,246,0.15)',
+        'card':   '0 4px 24px rgba(0,0,0,0.5)',
+        'glow-green':  '0 0 20px rgba(16,185,129,0.2)',
+        'glow-yellow': '0 0 20px rgba(234,179,8,0.2)',
+        'glow-red':    '0 0 20px rgba(239,68,68,0.2)',
       },
     },
   },
