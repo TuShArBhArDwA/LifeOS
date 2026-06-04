@@ -1,6 +1,23 @@
 'use client';
 
 import { format, parseISO } from 'date-fns';
+import { 
+  CheckSquare, 
+  Calendar, 
+  Target, 
+  Bell, 
+  AlertCircle, 
+  BookOpen, 
+  Mic, 
+  Pin,
+  AlertTriangle,
+  Lightbulb,
+  Sparkles,
+  Flame,
+  Check,
+  X,
+  Zap
+} from 'lucide-react';
 import type { GeneratedTask } from '@/lib/agents/task-agent';
 import type { GeneratedEvent } from '@/lib/agents/schedule-agent';
 import type { PlacementAgentOutput } from '@/lib/agents/placement-agent';
@@ -27,7 +44,9 @@ export function TasksCard({ tasks }: { tasks: GeneratedTask[] }) {
   return (
     <div className="glass-strong rounded-3xl p-5 border border-surface-border animate-slide-up">
       <div className="flex items-center gap-3 mb-4">
-        <div className="w-9 h-9 rounded-xl bg-brand-500/20 flex items-center justify-center text-lg">📋</div>
+        <div className="w-9 h-9 rounded-xl bg-brand-500/20 flex items-center justify-center">
+          <CheckSquare className="w-5 h-5 text-brand-400" />
+        </div>
         <div>
           <h3 className="font-semibold text-white text-sm">Tasks Created</h3>
           <p className="text-xs text-white/40">{tasks.length} action items</p>
@@ -62,12 +81,21 @@ export function TasksCard({ tasks }: { tasks: GeneratedTask[] }) {
 }
 
 /* ─── Events card ────────────────────────────────────── */
-const EVENT_ICONS: Record<string, string> = {
-  deadline: '🔴',
-  study_block: '📚',
-  reminder: '🔔',
-  interview: '🎤',
-};
+function getEventIcon(type: string) {
+  switch (type) {
+    case 'deadline':
+      return <AlertCircle className="w-4 h-4 text-red-400" />;
+    case 'study_block':
+      return <BookOpen className="w-4 h-4 text-blue-400" />;
+    case 'reminder':
+      return <Bell className="w-4 h-4 text-yellow-400" />;
+    case 'interview':
+      return <Mic className="w-4 h-4 text-purple-400" />;
+    default:
+      return <Pin className="w-4 h-4 text-white/40" />;
+  }
+}
+
 const EVENT_COLORS: Record<string, string> = {
   deadline: 'border-red-500/20 bg-red-500/5',
   study_block: 'border-brand-500/20 bg-brand-500/5',
@@ -80,7 +108,9 @@ export function EventsCard({ events }: { events: GeneratedEvent[] }) {
   return (
     <div className="glass-strong rounded-3xl p-5 border border-surface-border animate-slide-up" style={{ animationDelay: '0.1s' }}>
       <div className="flex items-center gap-3 mb-4">
-        <div className="w-9 h-9 rounded-xl bg-accent-green/20 flex items-center justify-center text-lg">📅</div>
+        <div className="w-9 h-9 rounded-xl bg-accent-green/20 flex items-center justify-center">
+          <Calendar className="w-5 h-5 text-accent-green" />
+        </div>
         <div>
           <h3 className="font-semibold text-white text-sm">Calendar Events</h3>
           <p className="text-xs text-white/40">{events.length} events scheduled</p>
@@ -92,7 +122,7 @@ export function EventsCard({ events }: { events: GeneratedEvent[] }) {
             key={i}
             className={`flex items-center gap-3 p-3 rounded-2xl border transition-all ${EVENT_COLORS[event.event_type] ?? 'border-surface-border bg-surface-elevated'}`}
           >
-            <span className="text-lg">{EVENT_ICONS[event.event_type] ?? '📌'}</span>
+            <span className="flex-shrink-0">{getEventIcon(event.event_type)}</span>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-white truncate">{event.title}</p>
               <p className="text-xs text-white/40">
@@ -117,18 +147,21 @@ export function PlacementCard({ placement }: { placement: PlacementAgentOutput }
   return (
     <div className="glass-strong rounded-3xl p-5 border border-surface-border animate-slide-up" style={{ animationDelay: '0.2s' }}>
       <div className="flex items-center gap-3 mb-4">
-        <div className="w-9 h-9 rounded-xl bg-accent-yellow/20 flex items-center justify-center text-lg">🎯</div>
+        <div className="w-9 h-9 rounded-xl bg-accent-yellow/20 flex items-center justify-center">
+          <Target className="w-5 h-5 text-accent-yellow" />
+        </div>
         <div>
           <h3 className="font-semibold text-white text-sm">Placement Analysis</h3>
           <p className="text-xs text-white/40">{placement.company}</p>
         </div>
         {/* Eligibility badge */}
-        <div className={`ml-auto px-3 py-1 rounded-full text-xs font-bold border ${
+        <div className={`ml-auto px-3 py-1 rounded-full text-xs font-bold border flex items-center gap-1.5 ${
           eligible
             ? 'bg-green-500/15 border-green-500/30 text-green-400'
             : 'bg-red-500/15 border-red-500/30 text-red-400'
         }`}>
-          {eligible ? '✓ Eligible' : '✗ Not Eligible'}
+          {eligible ? <Check className="w-3.5 h-3.5" /> : <X className="w-3.5 h-3.5" />}
+          <span>{eligible ? 'Eligible' : 'Not Eligible'}</span>
         </div>
       </div>
 
@@ -157,10 +190,12 @@ export function PlacementCard({ placement }: { placement: PlacementAgentOutput }
           <div className="space-y-1.5">
             {placement.documents_checklist.map((doc, i) => (
               <div key={i} className="flex items-center gap-2 text-sm">
-                <span className={`text-sm ${
-                  doc.status === 'needs_update' ? 'text-yellow-400' : 'text-green-400'
-                }`}>
-                  {doc.status === 'needs_update' ? '⚠️' : '✓'}
+                <span className="flex-shrink-0">
+                  {doc.status === 'needs_update' ? (
+                    <AlertTriangle className="w-4 h-4 text-yellow-400" />
+                  ) : (
+                    <Check className="w-4 h-4 text-green-400" />
+                  )}
                 </span>
                 <span className={`text-sm ${doc.status === 'needs_update' ? 'text-yellow-300' : 'text-white/60'}`}>
                   {doc.doc}
@@ -208,16 +243,28 @@ const TONE_STYLES: Record<string, string> = {
   encouraging:   'border-green-500/20 bg-green-500/5',
   informational: 'border-brand-500/20 bg-brand-500/5',
 };
-const TONE_ICONS: Record<string, string> = {
-  urgent: '🚨', encouraging: '💪', informational: '💡',
-};
+
+function getToneIcon(tone: string) {
+  switch (tone) {
+    case 'urgent':
+      return <Flame className="w-4.5 h-4.5 text-red-400" />;
+    case 'encouraging':
+      return <Sparkles className="w-4.5 h-4.5 text-green-400" />;
+    case 'informational':
+      return <Lightbulb className="w-4.5 h-4.5 text-brand-400" />;
+    default:
+      return <Bell className="w-4.5 h-4.5 text-white/40" />;
+  }
+}
 
 export function RemindersCard({ reminders }: { reminders: GeneratedReminder[] }) {
   if (!reminders?.length) return null;
   return (
     <div className="glass-strong rounded-3xl p-5 border border-surface-border animate-slide-up" style={{ animationDelay: '0.3s' }}>
       <div className="flex items-center gap-3 mb-4">
-        <div className="w-9 h-9 rounded-xl bg-accent-purple/20 flex items-center justify-center text-lg">🔔</div>
+        <div className="w-9 h-9 rounded-xl bg-accent-purple/20 flex items-center justify-center">
+          <Bell className="w-5 h-5 text-accent-purple" />
+        </div>
         <div>
           <h3 className="font-semibold text-white text-sm">Smart Reminders</h3>
           <p className="text-xs text-white/40">{reminders.length} context-aware nudges</p>
@@ -229,15 +276,18 @@ export function RemindersCard({ reminders }: { reminders: GeneratedReminder[] })
             key={i}
             className={`p-3 rounded-2xl border ${TONE_STYLES[reminder.tone] ?? 'border-surface-border bg-surface-elevated'}`}
           >
-            <div className="flex items-start gap-2">
-              <span>{TONE_ICONS[reminder.tone] ?? '🔔'}</span>
-              <div>
+            <div className="flex items-start gap-2.5">
+              <span className="mt-0.5 flex-shrink-0">{getToneIcon(reminder.tone)}</span>
+              <div className="flex-1 min-w-0">
                 <p className="text-sm text-white leading-relaxed">{reminder.message}</p>
                 <p className="text-xs text-white/30 mt-1">
                   {format(parseISO(reminder.remind_at), 'EEE, MMM d · h:mm a')}
                 </p>
                 {reminder.why_it_matters && (
-                  <p className="text-xs text-white/40 italic mt-1">⚡ {reminder.why_it_matters}</p>
+                  <p className="text-xs text-brand-400 flex items-center gap-1 font-medium mt-1.5">
+                    <Zap className="w-3.5 h-3.5 text-brand-400" />
+                    <span>{reminder.why_it_matters}</span>
+                  </p>
                 )}
               </div>
             </div>

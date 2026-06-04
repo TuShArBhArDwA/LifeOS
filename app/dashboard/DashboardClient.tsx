@@ -4,6 +4,17 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { UserButton } from '@clerk/nextjs';
 import { format, parseISO, isToday, isTomorrow, isPast } from 'date-fns';
+import { 
+  Camera, 
+  Sparkles, 
+  AlertTriangle, 
+  AlertCircle, 
+  BookOpen, 
+  Bell, 
+  Mic, 
+  Pin,
+  Plus
+} from 'lucide-react';
 import type { Profile, Task, CalendarEvent, Reminder, Intake } from '@/lib/supabase';
 
 type Props = {
@@ -20,9 +31,20 @@ const PRIORITY_CONFIG = {
   3: { label: 'Low', dot: 'bg-green-400', badge: 'bg-green-500/15 text-green-400 border-green-500/25' },
 } as const;
 
-const EVENT_ICONS: Record<string, string> = {
-  deadline: '🔴', study_block: '📚', reminder: '🔔', interview: '🎤',
-};
+function getEventIcon(type: string) {
+  switch (type) {
+    case 'deadline':
+      return <AlertCircle className="w-4 h-4 text-red-400" />;
+    case 'study_block':
+      return <BookOpen className="w-4 h-4 text-blue-400" />;
+    case 'reminder':
+      return <Bell className="w-4 h-4 text-yellow-400" />;
+    case 'interview':
+      return <Mic className="w-4 h-4 text-purple-400" />;
+    default:
+      return <Pin className="w-4 h-4 text-white/40" />;
+  }
+}
 
 function formatEventDate(dateStr: string) {
   try {
@@ -35,12 +57,12 @@ function formatEventDate(dateStr: string) {
 
 function formatIntentTag(intent: string) {
   const map: Record<string, string> = {
-    placement_notice: '🏢 Placement',
-    assignment: '📚 Assignment',
-    exam: '📝 Exam',
-    timetable: '📅 Timetable',
-    fee_notice: '💰 Fee',
-    general: '📋 General',
+    placement_notice: 'Placement',
+    assignment: 'Assignment',
+    exam: 'Exam',
+    timetable: 'Timetable',
+    fee_notice: 'Fee',
+    general: 'General',
   };
   return map[intent] ?? intent;
 }
@@ -65,7 +87,7 @@ export default function DashboardClient({ profile, tasks, events, reminders, int
               id="dashboard-upload-btn"
               className="flex items-center gap-2 bg-brand-500 hover:bg-brand-600 text-white px-4 py-2 rounded-xl text-sm font-medium transition-all hover:shadow-brand"
             >
-              <span>+</span>
+              <Plus className="w-4 h-4" />
               <span>Capture</span>
             </Link>
             <UserButton afterSignOutUrl="/" />
@@ -79,7 +101,10 @@ export default function DashboardClient({ profile, tasks, events, reminders, int
           <div className="flex items-center justify-between">
             <div>
               <p className="text-white/50 text-sm">Good {getGreeting()},</p>
-              <h1 className="text-xl font-bold text-white mt-0.5">{profile.name.split(' ')[0]} 👋</h1>
+              <h1 className="text-xl font-bold text-white mt-0.5 flex items-center gap-1.5">
+                <span>{profile.name.split(' ')[0]}</span>
+                <Sparkles className="w-5 h-5 text-brand-400" />
+              </h1>
             </div>
             <div className="text-right">
               <p className="text-xs text-white/40 mb-1">CGPA</p>
@@ -108,7 +133,9 @@ export default function DashboardClient({ profile, tasks, events, reminders, int
         {/* Empty state */}
         {intakes.length === 0 && (
           <div className="text-center py-12 animate-fade-in">
-            <div className="w-20 h-20 rounded-3xl bg-surface-elevated border border-surface-border flex items-center justify-center text-4xl mx-auto mb-4">📸</div>
+            <div className="w-20 h-20 rounded-3xl bg-surface-elevated border border-surface-border flex items-center justify-center mx-auto mb-4">
+              <Camera className="w-8 h-8 text-white/40" />
+            </div>
             <h2 className="font-semibold text-white text-lg mb-2">Nothing here yet</h2>
             <p className="text-white/40 text-sm mb-6 max-w-xs mx-auto">
               Upload a screenshot, placement notice, or PDF to let LifeOS go to work.
@@ -118,7 +145,8 @@ export default function DashboardClient({ profile, tasks, events, reminders, int
               id="empty-upload-btn"
               className="inline-flex items-center gap-2 bg-brand-500 hover:bg-brand-600 text-white px-6 py-3 rounded-2xl font-semibold transition-all hover:shadow-brand"
             >
-              📸 Capture something
+              <Camera className="w-4 h-4" />
+              <span>Capture something</span>
             </Link>
           </div>
         )}
@@ -163,9 +191,10 @@ export default function DashboardClient({ profile, tasks, events, reminders, int
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-white leading-snug">{task.title}</p>
                       {task.due_date && (
-                        <p className={`text-xs mt-1 font-medium ${isPast(parseISO(task.due_date)) ? 'text-red-400' : 'text-white/40'}`}>
-                          {isPast(parseISO(task.due_date)) ? '⚠️ Overdue · ' : ''}
-                          {format(parseISO(task.due_date), 'MMM d, yyyy')}
+                        <p className={`text-xs mt-1 font-medium flex items-center gap-1 ${isPast(parseISO(task.due_date)) ? 'text-red-400' : 'text-white/40'}`}>
+                          {isPast(parseISO(task.due_date)) && <AlertTriangle className="w-3.5 h-3.5 inline text-red-400" />}
+                          <span>{isPast(parseISO(task.due_date)) ? 'Overdue · ' : ''}</span>
+                          <span>{format(parseISO(task.due_date), 'MMM d, yyyy')}</span>
                         </p>
                       )}
                     </div>
@@ -188,7 +217,7 @@ export default function DashboardClient({ profile, tasks, events, reminders, int
             <div className="space-y-2">
               {upcomingEvents.slice(0, 5).map((event) => (
                 <div key={event.id} className="flex items-center gap-3 p-4 glass rounded-2xl border border-surface-border">
-                  <span className="text-xl w-8 text-center">{EVENT_ICONS[event.event_type] ?? '📌'}</span>
+                  <span className="w-8 flex items-center justify-center">{getEventIcon(event.event_type)}</span>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-white truncate">{event.title}</p>
                     <p className="text-xs text-white/40">{formatEventDate(event.start_time)}</p>
@@ -207,9 +236,10 @@ export default function DashboardClient({ profile, tasks, events, reminders, int
               {reminders.map((reminder) => (
                 <div key={reminder.id} className="p-4 glass rounded-2xl border border-yellow-500/15 bg-yellow-500/5">
                   <p className="text-sm text-white/80 leading-relaxed">{reminder.message}</p>
-                  <p className="text-xs text-yellow-500/60 mt-1">
-                    🔔 {formatEventDate(reminder.remind_at)}
-                  </p>
+                  <div className="flex items-center gap-1 text-xs text-yellow-500/60 mt-1">
+                    <Bell className="w-3.5 h-3.5" />
+                    <span>{formatEventDate(reminder.remind_at)}</span>
+                  </div>
                 </div>
               ))}
             </div>
@@ -224,7 +254,7 @@ export default function DashboardClient({ profile, tasks, events, reminders, int
           id="fab-upload-btn"
           className="flex items-center gap-2 bg-gradient-brand text-white px-5 py-4 rounded-2xl font-semibold shadow-brand hover:opacity-90 transition-all hover:scale-105 active:scale-95 animate-pulse-glow"
         >
-          <span className="text-lg">📸</span>
+          <Camera className="w-5 h-5" />
           <span className="text-sm">Capture</span>
         </Link>
       </div>

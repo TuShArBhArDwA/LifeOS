@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { SignInButton, SignUpButton } from '@clerk/nextjs';
 import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
+import { Camera, Brain, Zap, CheckCircle2 } from 'lucide-react';
 
 export default async function LandingPage() {
   const { userId } = await auth();
@@ -85,13 +86,13 @@ export default async function LandingPage() {
         <h2 className="text-2xl font-bold text-center mb-12">How it works</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
           {[
-            { step: '01', icon: '📸', title: 'Capture', desc: 'Screenshot, PDF, text, or voice' },
-            { step: '02', icon: '🧠', title: 'Understand', desc: 'AI extracts intent and data' },
-            { step: '03', icon: '⚡', title: 'Act', desc: 'Agents collaborate in parallel' },
-            { step: '04', icon: '✅', title: 'Done', desc: 'Tasks, schedule, plan — ready' },
+            { step: '01', icon: <Camera className="w-8 h-8 text-brand-400 mx-auto" />, title: 'Capture', desc: 'Screenshot, PDF, text, or voice' },
+            { step: '02', icon: <Brain className="w-8 h-8 text-brand-400 mx-auto" />, title: 'Understand', desc: 'AI extracts intent and data' },
+            { step: '03', icon: <Zap className="w-8 h-8 text-brand-400 mx-auto" />, title: 'Act', desc: 'Agents collaborate in parallel' },
+            { step: '04', icon: <CheckCircle2 className="w-8 h-8 text-brand-400 mx-auto" />, title: 'Done', desc: 'Tasks, schedule, plan — ready' },
           ].map((item) => (
-            <div key={item.step} className="glass rounded-2xl p-6 text-center hover:border-brand-500/30 transition-all hover:-translate-y-1 border border-transparent">
-              <div className="text-3xl mb-3">{item.icon}</div>
+            <div key={item.step} className="glass rounded-2xl p-6 text-center hover:border-brand-500/30 transition-all hover:-translate-y-1 border border-transparent flex flex-col items-center">
+              <div className="mb-3">{item.icon}</div>
               <div className="text-xs text-brand-400 font-mono mb-1">{item.step}</div>
               <div className="font-semibold mb-2">{item.title}</div>
               <div className="text-sm text-white/50">{item.desc}</div>
