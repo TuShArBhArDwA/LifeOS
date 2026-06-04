@@ -233,4 +233,4 @@ Or connect the GitHub repo to [vercel.com](https://vercel.com) and add environme
 
 ## License
 
-MIT © [Tushar Bhardwaj](https://github.com/TuShArBhArDwA)
+MIT © [Tushar Bhardwaj](LICENSE)
