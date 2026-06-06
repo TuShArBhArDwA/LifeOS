@@ -201,6 +201,10 @@ export default function UploadPage() {
           intent: data.orchestrator?.intent || 'general',
           summary: data.orchestrator?.summary || 'Mock summary',
           raw_extracted: data.orchestrator?.extracted || {},
+          placement: data.placement || null,
+          expense: data.expense || null,
+          study: data.study || null,
+          content: data.content || null,
           created_at: new Date().toISOString()
         };
 
@@ -292,7 +296,7 @@ export default function UploadPage() {
                   {
                     id: 'example-all',
                     icon: Sparkles,
-                    label: '🏆 Multi-Agent Mega Demo',
+                    label: 'Multi-Agent Mega Demo',
                     sub: 'TCS Placement notice, study tips, leave letter, and food bills',
                     color: 'text-yellow-400 font-bold',
                     bg: 'hover:border-yellow-500/40 hover:bg-yellow-500/10 border-yellow-500/20 bg-yellow-500/5',

@@ -18,7 +18,12 @@ type Props = {
   tasks: Task[];
   events: CalendarEvent[];
   reminders: Reminder[];
-  intakes: Intake[];
+  intakes: (Intake & {
+    placement?: any;
+    expense?: any;
+    study?: any;
+    content?: any;
+  })[];
 };
 
 /* ─── Priority config ────────────────────────────────────────────── */
@@ -152,7 +157,7 @@ export default function DashboardClient({ profile, tasks, events, reminders, int
   const [localTasks, setLocalTasks] = useState<Task[]>(tasks);
   const [localEvents, setLocalEvents] = useState<CalendarEvent[]>(events);
   const [localReminders, setLocalReminders] = useState<Reminder[]>(reminders);
-  const [localIntakes, setLocalIntakes] = useState<Intake[]>(intakes);
+  const [localIntakes, setLocalIntakes] = useState<Props['intakes']>(intakes);
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
@@ -289,7 +294,7 @@ export default function DashboardClient({ profile, tasks, events, reminders, int
               <div className="flex items-center gap-6 sm:gap-8">
                 {/* CGPA ring */}
                 <div className="text-center">
-                  <div className="text-3xl font-black gradient-text">{profile.cgpa}</div>
+                  <div className="text-3xl font-black gradient-text">{profile.cgpa}<span className="text-xs text-white/35 font-normal ml-0.5">/10</span></div>
                   <div className="text-[10px] text-white/30 font-medium mt-0.5 uppercase tracking-wider">CGPA</div>
                 </div>
 
@@ -389,7 +394,57 @@ export default function DashboardClient({ profile, tasks, events, reminders, int
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-sm text-white/75 leading-relaxed line-clamp-2">{intake.summary}</p>
-                          <p className="text-[11px] text-white/25 mt-1.5 font-medium">
+                          
+                          {/* Inline Placement Detail */}
+                          {intake.placement && (
+                            <div className="mt-2.5 p-3 rounded-xl bg-emerald-500/5 border border-emerald-500/10 text-xs">
+                              <p className="font-semibold text-emerald-400">Placement Agent: {intake.placement.company}</p>
+                              <p className="text-white/60 mt-1">Role: {intake.placement.role || 'N/A'} | Status: <strong className={intake.placement.eligibility.eligible ? 'text-emerald-400' : 'text-red-400'}>{intake.placement.eligibility.eligible ? 'Eligible' : 'Not Eligible'}</strong></p>
+                              {intake.placement.eligibility.overall_reasons && (
+                                <p className="text-white/45 mt-1 text-[11px]">{intake.placement.eligibility.overall_reasons.join(', ')}</p>
+                              )}
+                            </div>
+                          )}
+
+                          {/* Inline Expense Detail */}
+                          {intake.expense && (
+                            <div className="mt-2.5 p-3 rounded-xl bg-pink-500/5 border border-pink-500/10 text-xs">
+                              <p className="font-semibold text-pink-400">Expense Agent: ₹{intake.expense.total.toLocaleString('en-IN')}</p>
+                              <div className="space-y-1 mt-1.5">
+                                {intake.expense.expenses.map((exp: any, expIdx: number) => (
+                                  <div key={expIdx} className="flex justify-between text-[11px] text-white/50">
+                                    <span>{exp.merchant} ({exp.category})</span>
+                                    <span className="font-semibold text-white/80">₹{exp.amount}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Inline Study Detail */}
+                          {intake.study && (
+                            <div className="mt-2.5 p-3 rounded-xl bg-violet-500/5 border border-violet-500/10 text-xs">
+                              <p className="font-semibold text-violet-400">Study Agent: {intake.study.subject}</p>
+                              <ul className="list-disc pl-4 space-y-1 text-white/50 mt-1 text-[11px]">
+                                {intake.study.summary_points.slice(0, 3).map((pt: string, ptIdx: number) => (
+                                  <li key={ptIdx}>{pt}</li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+
+                          {/* Inline Draft Detail */}
+                          {intake.content && (
+                            <div className="mt-2.5 p-3 rounded-xl bg-cyan-500/5 border border-cyan-500/10 text-xs">
+                              <p className="font-semibold text-cyan-400">Content Agent: {intake.content.subject}</p>
+                              <p className="text-white/60 mt-1 text-[11px]">Recipient: {intake.content.recipient}</p>
+                              <pre className="mt-2 p-2 rounded bg-surface-elevated/40 text-[10px] text-white/50 whitespace-pre-wrap font-mono select-all border border-surface-border/50 max-h-24 overflow-y-auto">
+                                {intake.content.draft}
+                              </pre>
+                            </div>
+                          )}
+
+                          <p className="text-[11px] text-white/25 mt-2 font-medium">
                             {format(parseISO(intake.created_at), 'EEE, MMM d · h:mm a')}
                           </p>
                         </div>
