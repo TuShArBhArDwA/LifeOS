@@ -1,7 +1,7 @@
 // LifeOS Service Worker
 // Strategy: Cache-first for static assets, Network-first for API/pages
 
-const CACHE_NAME = 'lifeos-v1';
+const CACHE_NAME = 'lifeos-v3';
 const STATIC_ASSETS = [
   '/',
   '/dashboard',

@@ -75,6 +75,22 @@ export default function RootLayout({
           <link rel="preconnect" href="https://fonts.googleapis.com" />
           <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
 
+          {/* App version guard: wipe stale guest data on deploy */}
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `
+                var APP_VERSION = 'v3';
+                var storedVersion = localStorage.getItem('lifeos_app_version');
+                if (storedVersion !== APP_VERSION) {
+                  localStorage.removeItem('lifeos_guest_tasks');
+                  localStorage.removeItem('lifeos_guest_events');
+                  localStorage.removeItem('lifeos_guest_reminders');
+                  localStorage.removeItem('lifeos_guest_intakes');
+                  localStorage.setItem('lifeos_app_version', APP_VERSION);
+                }
+              `,
+            }}
+          />
           {/* Service Worker registration */}
           <script
             dangerouslySetInnerHTML={{
