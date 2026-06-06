@@ -48,7 +48,13 @@ export async function POST(req: NextRequest) {
         const buffer = await file.arrayBuffer();
         imageBase64 = Buffer.from(buffer).toString('base64');
         mimeType = file.type;
-        inputType = file.type === 'application/pdf' ? 'pdf' : 'screenshot';
+        if (file.type === 'application/pdf') {
+          inputType = 'pdf';
+        } else if (file.type.startsWith('audio/')) {
+          inputType = 'voice';
+        } else {
+          inputType = 'screenshot';
+        }
       } else if (text) {
         textInput = text;
         inputType = 'text';

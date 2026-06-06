@@ -1,7 +1,15 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
+import { 
+  Camera, 
+  UploadCloud, 
+  Sparkles, 
+  Mic, 
+  Square, 
+  FileText 
+} from 'lucide-react';
 
 type UploadZoneProps = {
   onUpload: (file: File | null, text?: string) => void;
@@ -13,11 +21,65 @@ export default function UploadZone({ onUpload, loading = false }: UploadZoneProp
   const [textInput, setTextInput] = useState('');
   const [preview, setPreview] = useState<string | null>(null);
 
+  // Voice recording states
+  const [isRecording, setIsRecording] = useState(false);
+  const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
+  const [recordingDuration, setRecordingDuration] = useState(0);
+  const [timerId, setTimerId] = useState<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (timerId) clearInterval(timerId);
+    };
+  }, [timerId]);
+
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const recorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+      const chunks: Blob[] = [];
+
+      recorder.ondataavailable = (e) => {
+        if (e.data.size > 0) chunks.push(e.data);
+      };
+
+      recorder.onstop = () => {
+        const audioBlob = new Blob(chunks, { type: 'audio/webm' });
+        const audioFile = new File([audioBlob], 'voice-intake.webm', { type: 'audio/webm' });
+        stream.getTracks().forEach((track) => track.stop());
+        onUpload(audioFile);
+      };
+
+      recorder.start();
+      setMediaRecorder(recorder);
+      setIsRecording(true);
+      setRecordingDuration(0);
+
+      const interval = setInterval(() => {
+        setRecordingDuration((prev) => prev + 1);
+      }, 1000);
+      setTimerId(interval);
+    } catch (err) {
+      console.error('Failed to start recording:', err);
+      alert('Could not access microphone.');
+    }
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorder && isRecording) {
+      mediaRecorder.stop();
+      setIsRecording(false);
+      if (timerId) {
+        clearInterval(timerId);
+        setTimerId(null);
+      }
+    }
+  };
+
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
       const file = acceptedFiles[0];
       if (!file) return;
-      // Image preview
       if (file.type.startsWith('image/')) {
         const url = URL.createObjectURL(file);
         setPreview(url);
@@ -104,7 +166,11 @@ Example: 'TCS NQT Drive — Register by Friday June 7. Eligibility: 60%+, No bac
           <div className="space-y-4">
             {/* Icon */}
             <div className="relative inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-surface-elevated border border-surface-border mx-auto">
-              <span className="text-4xl">{isDragActive ? '✨' : '📸'}</span>
+              {isDragActive ? (
+                <Sparkles className="w-8 h-8 text-brand-400" />
+              ) : (
+                <UploadCloud className="w-8 h-8 text-white/40" />
+              )}
               {isDragActive && (
                 <div className="absolute inset-0 rounded-3xl border-2 border-brand-500 animate-pulse" />
               )}
@@ -136,14 +202,37 @@ Example: 'TCS NQT Drive — Register by Friday June 7. Eligibility: 60%+, No bac
         <div className="flex-1 h-px bg-surface-border" />
       </div>
 
-      {/* Text mode */}
-      <button
-        id="switch-to-text-btn"
-        onClick={() => setTextMode(true)}
-        className="w-full py-4 glass border border-surface-border rounded-2xl text-white/60 hover:text-white hover:border-brand-500/40 font-medium text-sm transition-all"
-      >
-        📝 Paste text instead
-      </button>
+      {/* Mode selectors */}
+      <div className="grid grid-cols-2 gap-3">
+        <button
+          id="switch-to-text-btn"
+          onClick={() => setTextMode(true)}
+          className="py-4 glass border border-surface-border rounded-2xl text-white/60 hover:text-white hover:border-brand-500/40 font-medium text-sm transition-all flex items-center justify-center gap-2"
+        >
+          <FileText className="w-4 h-4" />
+          <span>Paste text</span>
+        </button>
+
+        {isRecording ? (
+          <button
+            id="stop-voice-btn"
+            onClick={stopRecording}
+            className="py-4 bg-red-500/10 border border-red-500/30 rounded-2xl text-red-400 font-semibold text-sm transition-all flex items-center justify-center gap-2 animate-pulse"
+          >
+            <Square className="w-4 h-4 fill-current" />
+            <span>Stop ({recordingDuration}s)</span>
+          </button>
+        ) : (
+          <button
+            id="start-voice-btn"
+            onClick={startRecording}
+            className="py-4 glass border border-surface-border rounded-2xl text-white/60 hover:text-white hover:border-brand-500/40 font-medium text-sm transition-all flex items-center justify-center gap-2"
+          >
+            <Mic className="w-4 h-4" />
+            <span>Record voice</span>
+          </button>
+        )}
+      </div>
     </div>
   );
 }

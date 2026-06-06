@@ -6,6 +6,7 @@ import Link from 'next/link';
 import UploadZone from '@/components/UploadZone';
 import AgentThinking from '@/components/AgentThinking';
 import { TasksCard, EventsCard, PlacementCard, RemindersCard } from '@/components/ActionCards';
+import { AlertCircle, Sparkles } from 'lucide-react';
 import type { GeneratedTask } from '@/lib/agents/task-agent';
 import type { GeneratedEvent } from '@/lib/agents/schedule-agent';
 import type { PlacementAgentOutput } from '@/lib/agents/placement-agent';
@@ -154,8 +155,8 @@ export default function UploadPage() {
 
         {/* ERROR */}
         {state === 'error' && (
-          <div className="text-center py-12 animate-fade-in">
-            <div className="text-5xl mb-4">😕</div>
+          <div className="text-center py-12 animate-fade-in flex flex-col items-center justify-center">
+            <AlertCircle className="w-12 h-12 text-red-500 mb-4" />
             <h3 className="font-semibold text-white mb-2">Something went wrong</h3>
             <p className="text-sm text-white/40 mb-6">{error}</p>
             <button
@@ -174,7 +175,9 @@ export default function UploadPage() {
             {/* Summary banner */}
             <div className="glass-strong border border-brand-500/20 rounded-3xl p-5">
               <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-gradient-brand flex items-center justify-center text-xl flex-shrink-0">✨</div>
+                <div className="w-10 h-10 rounded-2xl bg-gradient-brand flex items-center justify-center flex-shrink-0">
+                  <Sparkles className="w-5 h-5 text-white" />
+                </div>
                 <div>
                   <p className="text-xs text-brand-400 font-semibold uppercase tracking-wider mb-1">LifeOS Summary</p>
                   <p className="text-white font-medium text-sm leading-relaxed">{result.orchestrator.summary}</p>
