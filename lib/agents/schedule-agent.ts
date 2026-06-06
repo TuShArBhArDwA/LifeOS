@@ -1,4 +1,4 @@
-import { geminiJSON } from '@/lib/gemini';
+import { groqJSON } from '@/lib/groq';
 import type { OrchestratorOutput } from './orchestrator';
 import type { Profile } from '@/lib/supabase';
 
@@ -20,13 +20,7 @@ export async function runScheduleAgent(
 ): Promise<ScheduleAgentOutput> {
   const today = new Date().toISOString().split('T')[0];
 
-  const prompt = `
-You are the LifeOS Schedule Agent. Create calendar events for a student based on document data.
-
-Student: ${profile.name} | ${profile.branch} Year ${profile.year}
-Today: ${today}
-Document Intent: ${orchestratorOutput.intent}
-Extracted Data: ${JSON.stringify(orchestratorOutput.extracted, null, 2)}
+  const systemPrompt = `You are the LifeOS Schedule Agent. Create calendar events for a student based on document data.
 
 Create 3-8 calendar events. Include:
 1. Deadline events (registration close, submission due, etc.)
@@ -51,8 +45,12 @@ Rules:
 - Deadline events should be at 23:59 on the due date
 - Reminder events at 09:00 the day before deadline
 - Spread study blocks across multiple days (not all on one day)
-- All times in IST (UTC+5:30 — but write without timezone offset)
-`;
+- All times in IST (UTC+5:30 — but write without timezone offset)`;
 
-  return geminiJSON<ScheduleAgentOutput>(prompt);
+  const userPrompt = `Student: ${profile.name} | ${profile.branch} Year ${profile.year}
+Today: ${today}
+Document Intent: ${orchestratorOutput.intent}
+Extracted Data: ${JSON.stringify(orchestratorOutput.extracted, null, 2)}`;
+
+  return groqJSON<ScheduleAgentOutput>(systemPrompt, userPrompt);
 }

@@ -1,4 +1,4 @@
-import { geminiJSON } from '@/lib/gemini';
+import { groqJSON } from '@/lib/groq';
 import type { OrchestratorOutput } from './orchestrator';
 import type { Profile } from '@/lib/supabase';
 
@@ -20,16 +20,8 @@ export async function runTaskAgent(
 ): Promise<TaskAgentOutput> {
   const today = new Date().toISOString().split('T')[0];
 
-  const prompt = `
-You are the LifeOS Task Agent. Generate actionable tasks for a student based on extracted document data.
+  const systemPrompt = `You are the LifeOS Task Agent. Generate actionable tasks for a student based on extracted document data.
 
-Student: ${profile.name} | ${profile.branch} Year ${profile.year} | CGPA: ${profile.cgpa}
-Today: ${today}
-Document Intent: ${orchestratorOutput.intent}
-Summary: ${orchestratorOutput.summary}
-Extracted Data: ${JSON.stringify(orchestratorOutput.extracted, null, 2)}
-
-Generate 3-6 specific, actionable tasks. Prioritize by urgency.
 Priority: 1=High (due < 3 days), 2=Medium (due < 7 days), 3=Low (due > 7 days)
 
 Return ONLY valid JSON:
@@ -49,7 +41,13 @@ Make tasks specific — not "Prepare for interview" but "Complete TCS NQT mock t
 If placement notice: include registration, resume update, document gathering, preparation tasks.
 If assignment: include research, draft, review, submission tasks.
 If exam: include topic-wise study tasks.
-`;
+Generate 3-6 specific, actionable tasks. Prioritize by urgency.`;
 
-  return geminiJSON<TaskAgentOutput>(prompt);
+  const userPrompt = `Student: ${profile.name} | ${profile.branch} Year ${profile.year} | CGPA: ${profile.cgpa}
+Today: ${today}
+Document Intent: ${orchestratorOutput.intent}
+Summary: ${orchestratorOutput.summary}
+Extracted Data: ${JSON.stringify(orchestratorOutput.extracted, null, 2)}`;
+
+  return groqJSON<TaskAgentOutput>(systemPrompt, userPrompt);
 }

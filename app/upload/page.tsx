@@ -57,6 +57,9 @@ export default function UploadPage() {
 
       if (!res.ok) {
         const data = await res.json();
+        if (res.status === 429 && data.error === 'rate_limited') {
+          throw new Error(data.message ?? 'Rate limited — please wait a moment and try again.');
+        }
         throw new Error(data.error ?? 'Processing failed');
       }
 

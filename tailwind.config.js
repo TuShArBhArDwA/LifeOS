@@ -49,6 +49,7 @@ module.exports = {
         'bounce-soft': 'bounceSoft 1s ease-in-out infinite',
         'spin-slow':   'spin 3s linear infinite',
         'agent-ping':  'agentPing 1.5s ease-out infinite',
+        'fade-slide-in': 'fadeSlideIn 0.4s ease-out',
       },
       keyframes: {
         fadeIn:    { from: { opacity: '0' }, to: { opacity: '1' } },
@@ -70,6 +71,10 @@ module.exports = {
         agentPing: {
           '0%':   { transform: 'scale(1)', opacity: '1' },
           '100%': { transform: 'scale(2)', opacity: '0' },
+        },
+        fadeSlideIn: {
+          from: { opacity: '0', transform: 'translateY(6px)' },
+          to:   { opacity: '1', transform: 'translateY(0)' },
         },
       },
       backgroundImage: {

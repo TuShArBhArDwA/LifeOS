@@ -1,4 +1,5 @@
-import { geminiVisionJSON, geminiJSON } from '@/lib/gemini';
+import { geminiVisionJSON } from '@/lib/gemini';
+import { groqJSON } from '@/lib/groq';
 import type { Profile } from '@/lib/supabase';
 
 export type OrchestratorOutput = {
@@ -89,9 +90,9 @@ export async function runOrchestrator(
   if (imageBase64 && mimeType) {
     return geminiVisionJSON<OrchestratorOutput>(prompt, imageBase64, mimeType);
   } else if (textInput) {
-    return geminiJSON<OrchestratorOutput>(
-      `${prompt}\n\nContent to analyze:\n${textInput}`
-    );
+    const systemPrompt = prompt;
+    const userPrompt = `Content to analyze:\n${textInput}`;
+    return groqJSON<OrchestratorOutput>(systemPrompt, userPrompt);
   }
 
   throw new Error('Either imageBase64 or textInput must be provided');

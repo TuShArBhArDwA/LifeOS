@@ -1,4 +1,4 @@
-import { geminiJSON } from '@/lib/gemini';
+import { groqJSON } from '@/lib/groq';
 import type { OrchestratorOutput } from './orchestrator';
 import type { Profile } from '@/lib/supabase';
 
@@ -35,18 +35,7 @@ export async function runPlacementAgent(
 ): Promise<PlacementAgentOutput> {
   const today = new Date().toISOString().split('T')[0];
 
-  const prompt = `
-You are the LifeOS Placement Agent. Analyze a placement notice and generate a complete placement action plan.
-
-Student Profile:
-- Name: ${profile.name}
-- Branch: ${profile.branch}
-- Year: ${profile.year}
-- CGPA: ${profile.cgpa}
-- Skills: ${profile.skills.join(', ')}
-
-Today: ${today}
-Extracted Placement Data: ${JSON.stringify(orchestratorOutput.extracted, null, 2)}
+  const systemPrompt = `You are the LifeOS Placement Agent. Analyze a placement notice and generate a complete placement action plan.
 
 Perform a complete analysis. Return ONLY valid JSON:
 {
@@ -55,43 +44,35 @@ Perform a complete analysis. Return ONLY valid JSON:
   "registration_deadline": "YYYY-MM-DD or null",
   "eligibility": {
     "eligible": true/false,
-    "cgpa_check": {
-      "required": number or null,
-      "actual": ${profile.cgpa},
-      "passed": true/false
-    },
-    "branch_check": {
-      "required": ["CSE", "IT"] or null,
-      "actual": "${profile.branch}",
-      "passed": true/false
-    },
-    "backlog_check": {
-      "backlogs_allowed": true/false/null,
-      "message": "explanation"
-    },
-    "overall_reasons": ["Reason 1", "Reason 2"],
+    "cgpa_check": { "required": number or null, "actual": number, "passed": true/false },
+    "branch_check": { "required": ["CSE", "IT"] or null, "actual": "string", "passed": true/false },
+    "backlog_check": { "backlogs_allowed": true/false/null, "message": "explanation" },
+    "overall_reasons": ["Reason 1"],
     "missing_criteria": ["Criteria not met"]
   },
-  "missing_documents": ["doc1", "doc2"],
+  "missing_documents": ["doc1"],
   "documents_checklist": [
-    { "doc": "Updated Resume", "status": "needs_update" },
-    { "doc": "10th Marksheet", "status": "likely_available" }
+    { "doc": "Updated Resume", "status": "needs_update" }
   ],
   "prep_plan": [
-    {
-      "week": 1,
-      "label": "Week 1",
-      "focus": "Aptitude & Reasoning",
-      "tasks": ["Complete 50 quant questions daily", "Take 2 mock tests"]
-    }
+    { "week": 1, "label": "Week 1", "focus": "Aptitude & Reasoning", "tasks": ["Complete 50 quant questions daily"] }
   ],
-  "quick_tips": ["Tip 1", "Tip 2", "Tip 3"]
+  "quick_tips": ["Tip 1", "Tip 2"]
 }
 
 Be honest about eligibility. Check CGPA vs min_cgpa strictly.
 Generate 2-3 week prep plan covering: aptitude, technical, HR prep.
-Documents checklist should include standard placement docs + any specifically mentioned.
-`;
+Documents checklist should include standard placement docs + any specifically mentioned.`;
 
-  return geminiJSON<PlacementAgentOutput>(prompt);
+  const userPrompt = `Student Profile:
+- Name: ${profile.name}
+- Branch: ${profile.branch}
+- Year: ${profile.year}
+- CGPA: ${profile.cgpa}
+- Skills: ${profile.skills.join(', ')}
+
+Today: ${today}
+Extracted Placement Data: ${JSON.stringify(orchestratorOutput.extracted, null, 2)}`;
+
+  return groqJSON<PlacementAgentOutput>(systemPrompt, userPrompt);
 }

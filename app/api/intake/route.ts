@@ -171,6 +171,23 @@ export async function POST(req: NextRequest) {
     });
   } catch (error) {
     console.error('Intake API error:', error);
+
+    // Propagate Gemini rate-limit as a clean 429 with retry hint
+    const status = (error as { status?: number })?.status;
+    if (status === 429) {
+      const msg = String((error as { message?: string })?.message ?? '');
+      const delayMatch = msg.match(/(\d+(?:\.\d+)?)\s*s/i);
+      const retryAfter = delayMatch ? Math.ceil(parseFloat(delayMatch[1])) : 30;
+      return NextResponse.json(
+        {
+          error: 'rate_limited',
+          message: `The AI is temporarily busy. Please wait ${retryAfter} seconds and try again.`,
+          retryAfter,
+        },
+        { status: 429 }
+      );
+    }
+
     return NextResponse.json(
       { error: 'Processing failed', details: String(error) },
       { status: 500 }
