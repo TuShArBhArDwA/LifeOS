@@ -1,30 +1,84 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { 
+  Eye, 
+  Cpu, 
+  CheckSquare, 
+  Calendar, 
+  Target, 
+  Bell 
+} from 'lucide-react';
 
 type AgentStep = {
   id: string;
   label: string;
-  emoji: string;
   status: 'waiting' | 'active' | 'done';
 };
+
+const BASE_STEPS: AgentStep[] = [
+  { id: 'intake',       label: 'Intake Agent reading document',       status: 'waiting' },
+  { id: 'orchestrator', label: 'Orchestrator routing to agents',      status: 'waiting' },
+  { id: 'task',         label: 'Task Agent extracting deadlines',     status: 'waiting' },
+  { id: 'schedule',     label: 'Schedule Agent building calendar',    status: 'waiting' },
+  { id: 'placement',    label: 'Placement Agent checking eligibility',status: 'waiting' },
+  { id: 'reminder',     label: 'Reminder Agent crafting nudges',      status: 'waiting' },
+];
+
+function getStepIcon(id: string, status: 'waiting' | 'active' | 'done') {
+  const cls = `w-5 h-5 flex-shrink-0 ${
+    status === 'active' 
+      ? 'text-brand-400' 
+      : status === 'done' 
+      ? 'text-accent-green' 
+      : 'text-white/30'
+  }`;
+
+  switch (id) {
+    case 'intake':
+      return <Eye className={cls} />;
+    case 'orchestrator':
+      return <Cpu className={cls} />;
+    case 'task':
+      return <CheckSquare className={cls} />;
+    case 'schedule':
+      return <Calendar className={cls} />;
+    case 'placement':
+      return <Target className={cls} />;
+    case 'reminder':
+      return <Bell className={cls} />;
+    default:
+      return null;
+  }
+}
 
 type AgentThinkingProps = {
   intent?: string;
 };
 
-const BASE_STEPS: AgentStep[] = [
-  { id: 'intake',       label: 'Intake Agent reading document',       emoji: '👁️',  status: 'waiting' },
-  { id: 'orchestrator', label: 'Orchestrator routing to agents',      emoji: '🧠',  status: 'waiting' },
-  { id: 'task',         label: 'Task Agent extracting deadlines',     emoji: '📋',  status: 'waiting' },
-  { id: 'schedule',     label: 'Schedule Agent building calendar',    emoji: '📅',  status: 'waiting' },
-  { id: 'placement',    label: 'Placement Agent checking eligibility',emoji: '🎯',  status: 'waiting' },
-  { id: 'reminder',     label: 'Reminder Agent crafting nudges',      emoji: '🔔',  status: 'waiting' },
-];
-
 export default function AgentThinking({ intent }: AgentThinkingProps) {
-  const [steps, setSteps] = useState<AgentStep[]>(BASE_STEPS);
-  const [currentIdx, setCurrentIdx] = useState(0);
+  const [phase, setPhase] = useState(0);
+
+  // Map steps dynamically based on current phase to show parallel processing
+  const steps = BASE_STEPS.map((step) => {
+    let status: 'waiting' | 'active' | 'done' = 'waiting';
+
+    if (step.id === 'intake') {
+      if (phase === 0) status = 'active';
+      else status = 'done';
+    } else if (step.id === 'orchestrator') {
+      if (phase === 0) status = 'waiting';
+      else if (phase === 1) status = 'active';
+      else status = 'done';
+    } else {
+      // Parallel execution for tasks, schedule, placement, reminder
+      if (phase < 2) status = 'waiting';
+      else if (phase === 2) status = 'active';
+      else status = 'done';
+    }
+
+    return { ...step, status };
+  });
 
   // Filter steps based on intent
   const visibleSteps =
@@ -33,31 +87,26 @@ export default function AgentThinking({ intent }: AgentThinkingProps) {
       : steps;
 
   useEffect(() => {
-    if (currentIdx >= visibleSteps.length) return;
+    if (phase >= 3) return;
 
+    const durations = [600, 1000, 1500];
     const timer = setTimeout(() => {
-      setSteps((prev) =>
-        prev.map((s, i) => {
-          const idx = visibleSteps.findIndex((vs) => vs.id === s.id);
-          if (idx === currentIdx) return { ...s, status: 'active' };
-          if (idx < currentIdx) return { ...s, status: 'done' };
-          return s;
-        })
-      );
-      setCurrentIdx((i) => i + 1);
-    }, currentIdx === 0 ? 400 : 900);
+      setPhase((p) => p + 1);
+    }, durations[phase]);
 
     return () => clearTimeout(timer);
-  }, [currentIdx, visibleSteps.length]);
+  }, [phase]);
 
   return (
     <div className="w-full max-w-md mx-auto py-8 px-4">
-      {/* Header */}
+      {/* Header with active logo wave animation */}
       <div className="text-center mb-8">
-        <div className="relative inline-flex items-center justify-center w-16 h-16 mb-4">
-          <div className="absolute inset-0 rounded-full bg-brand-500/20 animate-ping" />
-          <div className="absolute inset-2 rounded-full bg-brand-500/30 animate-pulse" />
-          <span className="relative text-2xl">🤖</span>
+        <div className="relative inline-flex items-center justify-center w-20 h-20 mb-4">
+          <div className="absolute inset-0 rounded-2xl bg-brand-500/10 animate-ping opacity-50" />
+          <div className="absolute -inset-1.5 rounded-2xl border border-brand-500/20 animate-pulse opacity-80" />
+          <div className="relative w-14 h-14 rounded-2xl bg-surface-card border border-surface-border flex items-center justify-center p-2.5">
+            <img src="/favicon.png" alt="LifeOS" className="w-full h-full object-contain" />
+          </div>
         </div>
         <h3 className="text-lg font-semibold text-white">Agents collaborating</h3>
         <p className="text-sm text-white/40 mt-1">Processing your document...</p>
@@ -76,8 +125,8 @@ export default function AgentThinking({ intent }: AgentThinkingProps) {
                 : 'bg-surface-card border-surface-border opacity-40'
             }`}
           >
-            {/* Icon */}
-            <span className="text-xl w-8 text-center">{step.emoji}</span>
+            {/* SVG Icon */}
+            {getStepIcon(step.id, step.status)}
 
             {/* Label */}
             <span
@@ -122,7 +171,7 @@ export default function AgentThinking({ intent }: AgentThinkingProps) {
       </div>
 
       <p className="text-center text-xs text-white/25 mt-6 font-mono">
-        Powered by Gemini 2.0 Flash + Groq
+        Powered by Gemini 3.5 Flash + Groq
       </p>
     </div>
   );
