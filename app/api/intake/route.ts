@@ -7,6 +7,8 @@ import { runScheduleAgent } from '@/lib/agents/schedule-agent';
 import { runPlacementAgent } from '@/lib/agents/placement-agent';
 import { runReminderAgent } from '@/lib/agents/reminder-agent';
 import { runExpenseAgent } from '@/lib/agents/expense-agent';
+import { runStudyAgent } from '@/lib/agents/study-agent';
+import { runContentAgent } from '@/lib/agents/content-agent';
 import type { Profile } from '@/lib/supabase';
 
 export async function POST(req: NextRequest) {
@@ -104,7 +106,7 @@ export async function POST(req: NextRequest) {
     // Step 2: Run agents in parallel based on orchestrator decision
     const agentsToRun = orchestratorOutput.invoke_agents;
 
-    const [taskResult, scheduleResult, placementResult, reminderResult, expenseResult] = await Promise.allSettled([
+    const [taskResult, scheduleResult, placementResult, reminderResult, expenseResult, studyResult, contentResult] = await Promise.allSettled([
       agentsToRun.includes('task')
         ? runTaskAgent(profile as Profile, orchestratorOutput)
         : Promise.resolve(null),
@@ -120,6 +122,12 @@ export async function POST(req: NextRequest) {
       agentsToRun.includes('expense') && orchestratorOutput.intent === 'expense_receipt'
         ? runExpenseAgent(profile as Profile, imageBase64, mimeType, textInput)
         : Promise.resolve(null),
+      agentsToRun.includes('study') && orchestratorOutput.intent === 'study_notes'
+        ? runStudyAgent(profile as Profile, imageBase64, mimeType, textInput)
+        : Promise.resolve(null),
+      agentsToRun.includes('content') && orchestratorOutput.intent === 'content_request' && textInput
+        ? runContentAgent(profile as Profile, textInput)
+        : Promise.resolve(null),
     ]);
 
     const tasks = taskResult.status === 'fulfilled' ? taskResult.value : null;
@@ -127,6 +135,8 @@ export async function POST(req: NextRequest) {
     const placement = placementResult.status === 'fulfilled' ? placementResult.value : null;
     const reminders = reminderResult.status === 'fulfilled' ? reminderResult.value : null;
     const expense = expenseResult.status === 'fulfilled' ? expenseResult.value : null;
+    const study = studyResult.status === 'fulfilled' ? studyResult.value : null;
+    const content = contentResult.status === 'fulfilled' ? contentResult.value : null;
 
     // Step 3: Save to Supabase (only for authenticated users)
     let intakeId = 'guest_intake_' + Date.now();
@@ -198,6 +208,8 @@ export async function POST(req: NextRequest) {
       placement: placement ?? null,
       reminders: reminders?.reminders ?? [],
       expense: expense ?? null,
+      study: study ?? null,
+      content: content ?? null,
       intake_id: intakeId,
     });
   } catch (error) {

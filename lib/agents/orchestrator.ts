@@ -3,10 +3,10 @@ import { groqJSON } from '@/lib/groq';
 import type { Profile } from '@/lib/supabase';
 
 export type OrchestratorOutput = {
-  intent: 'placement_notice' | 'assignment' | 'exam' | 'timetable' | 'general' | 'fee_notice' | 'expense_receipt';
+  intent: 'placement_notice' | 'assignment' | 'exam' | 'timetable' | 'general' | 'fee_notice' | 'expense_receipt' | 'study_notes' | 'content_request';
   confidence: number;
   summary: string;
-  invoke_agents: Array<'task' | 'schedule' | 'placement' | 'reminder' | 'expense'>;
+  invoke_agents: Array<'task' | 'schedule' | 'placement' | 'reminder' | 'expense' | 'study' | 'content'>;
   extracted: {
     company?: string;
     deadline?: string; // ISO date string
@@ -45,10 +45,10 @@ Your job: Analyze the provided content and return a structured JSON object.
 
 Return ONLY valid JSON matching this exact schema:
 {
-  "intent": "placement_notice" | "assignment" | "exam" | "timetable" | "general" | "fee_notice" | "expense_receipt",
+  "intent": "placement_notice" | "assignment" | "exam" | "timetable" | "general" | "fee_notice" | "expense_receipt" | "study_notes" | "content_request",
   "confidence": 0.0-1.0,
   "summary": "One sentence summary for the student",
-  "invoke_agents": ["task", "schedule", "placement", "reminder", "expense"],
+  "invoke_agents": ["task", "schedule", "placement", "reminder", "expense", "study", "content"],
   "extracted": {
     "company": "string or null",
     "deadline": "YYYY-MM-DD or null",
@@ -71,12 +71,16 @@ Return ONLY valid JSON matching this exact schema:
 }
 
 Rules:
-- Always include all agents for placement_notice
-- For assignment/exam, include task + schedule + reminder
-- For general, include task + reminder
+- Always include all agents for placement_notice: ["task", "schedule", "placement", "reminder"]
+- For assignment/exam, include: ["task", "schedule", "reminder"]
+- For general, include: ["task", "reminder"]
+- For expense_receipt, invoke only: ["expense"]
+- For study_notes (lecture notes, chapter summaries, handwritten notes, textbook content), invoke: ["study"]
+- For content_request (user asks to draft email, write leave application, create report, compose message), invoke: ["content"]
 - Dates must be in YYYY-MM-DD format
 - If a date is relative (e.g., "this Friday"), resolve it from today's date
-- For expense_receipt, invoke only ["expense"]
+- Detect content_request when the input contains words like: draft, write, compose, apply for, send email, leave application, internship email, request letter
+- Detect study_notes when the input is study/learning material: notes, chapter, topic, formula, theory, syllabus
 `;
 
 export async function runOrchestrator(

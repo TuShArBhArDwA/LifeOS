@@ -8,13 +8,16 @@ import { TasksCard, EventsCard, PlacementCard, RemindersCard } from '@/component
 import {
   AlertCircle, Sparkles, Briefcase, BookOpen,
   Calendar, ArrowLeft, Plus, CheckCircle2,
-  ChevronRight, Zap, Target, IndianRupee, TrendingDown, Lightbulb
+  ChevronRight, Zap, Target, IndianRupee, TrendingDown, Lightbulb,
+  Brain, FileEdit, Copy, Check, X
 } from 'lucide-react';
 import type { GeneratedTask } from '@/lib/agents/task-agent';
 import type { GeneratedEvent } from '@/lib/agents/schedule-agent';
 import type { PlacementAgentOutput } from '@/lib/agents/placement-agent';
 import type { GeneratedReminder } from '@/lib/agents/reminder-agent';
 import type { ExpenseAgentOutput } from '@/lib/agents/expense-agent';
+import type { StudyAgentOutput } from '@/lib/agents/study-agent';
+import type { ContentAgentOutput } from '@/lib/agents/content-agent';
 
 type ProcessingState = 'idle' | 'processing' | 'done' | 'error';
 
@@ -25,16 +28,20 @@ type IntakeResult = {
   placement: PlacementAgentOutput | null;
   reminders: GeneratedReminder[];
   expense: ExpenseAgentOutput | null;
+  study: StudyAgentOutput | null;
+  content: ContentAgentOutput | null;
 };
 
 const INTENT_LABELS: Record<string, { label: string; color: string; bg: string }> = {
-  placement_notice: { label: 'Placement',    color: 'text-emerald-400', bg: 'bg-emerald-500/12 border-emerald-500/25' },
-  assignment:       { label: 'Assignment',   color: 'text-brand-400',   bg: 'bg-brand-500/12 border-brand-500/25' },
-  exam:             { label: 'Exam',         color: 'text-red-400',     bg: 'bg-red-500/12 border-red-500/25' },
-  timetable:        { label: 'Timetable',    color: 'text-yellow-400',  bg: 'bg-yellow-500/12 border-yellow-500/25' },
-  fee_notice:       { label: 'Fee Notice',   color: 'text-orange-400',  bg: 'bg-orange-500/12 border-orange-500/25' },
-  expense_receipt:  { label: '💸 Expense',   color: 'text-pink-400',    bg: 'bg-pink-500/12 border-pink-500/25' },
-  general:          { label: 'General',      color: 'text-white/50',    bg: 'bg-white/5 border-white/10' },
+  placement_notice: { label: 'Placement',      color: 'text-emerald-400', bg: 'bg-emerald-500/12 border-emerald-500/25' },
+  assignment:       { label: 'Assignment',     color: 'text-brand-400',   bg: 'bg-brand-500/12 border-brand-500/25' },
+  exam:             { label: 'Exam',           color: 'text-red-400',     bg: 'bg-red-500/12 border-red-500/25' },
+  timetable:        { label: 'Timetable',      color: 'text-yellow-400',  bg: 'bg-yellow-500/12 border-yellow-500/25' },
+  fee_notice:       { label: 'Fee Notice',     color: 'text-orange-400',  bg: 'bg-orange-500/12 border-orange-500/25' },
+  expense_receipt:  { label: 'Expense',        color: 'text-pink-400',    bg: 'bg-pink-500/12 border-pink-500/25' },
+  study_notes:      { label: 'Study Kit',      color: 'text-violet-400',  bg: 'bg-violet-500/12 border-violet-500/25' },
+  content_request:  { label: 'Draft Ready',    color: 'text-cyan-400',    bg: 'bg-cyan-500/12 border-cyan-500/25' },
+  general:          { label: 'General',        color: 'text-white/50',    bg: 'bg-white/5 border-white/10' },
 };
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -318,6 +325,24 @@ export default function UploadPage() {
                     bg: 'hover:border-pink-500/30 hover:bg-pink-500/5',
                     text: 'Spent today: Canteen lunch ₹80, Auto to college ₹45, Xerox of notes ₹30, Amazon order — DSA book ₹350. Total: ₹505.',
                   },
+                  {
+                    id: 'example-study',
+                    icon: Brain,
+                    label: 'Study notes',
+                    sub: 'Process Scheduling summary',
+                    color: 'text-violet-400',
+                    bg: 'hover:border-violet-500/30 hover:bg-violet-500/5',
+                    text: 'CPU Scheduling Notes: Scheduling is the process of deciding which process gets CPU time. Preemptive scheduling allows interrupting a process mid-execution (e.g. Round Robin, SRTF), while Non-Preemptive runs until done (e.g. FCFS, SJF). Gantt charts are used to calculate average waiting time and turnaround time. Turnaround Time = Completion Time - Arrival Time. Waiting Time = Turnaround Time - Burst Time.',
+                  },
+                  {
+                    id: 'example-content',
+                    icon: FileEdit,
+                    label: 'Content request',
+                    sub: 'Leave application',
+                    color: 'text-cyan-400',
+                    bg: 'hover:border-cyan-500/30 hover:bg-cyan-500/5',
+                    text: 'Draft a leave application to the HOD of CSE department requesting 2 days of leave (June 8th and 9th) because I have to travel out of station for a cousin\'s wedding.',
+                  },
                 ].map((ex) => (
                   <button
                     key={ex.id}
@@ -446,6 +471,8 @@ export default function UploadPage() {
 
             {/* Agent output cards */}
             {result.expense && <ExpenseCard expense={result.expense} />}
+            {result.study && <StudyCard study={result.study} />}
+            {result.content && <ContentCard content={result.content} />}
             <TasksCard tasks={result.tasks} />
             <EventsCard events={result.events} />
             {result.placement && <PlacementCard placement={result.placement} />}
@@ -476,3 +503,269 @@ export default function UploadPage() {
     </div>
   );
 }
+
+// ── STUDY CARD COMPONENT ──
+function StudyCard({ study }: { study: StudyAgentOutput }) {
+  const [activeTab, setActiveTab] = useState<'summary' | 'flashcards' | 'quiz'>('summary');
+  const [cardIdx, setCardIdx] = useState(0);
+  const [showAnswer, setShowAnswer] = useState(false);
+  const [selectedAnswers, setSelectedAnswers] = useState<Record<number, number>>({});
+  const [showResults, setShowResults] = useState(false);
+
+  const activeCard = study.flashcards[cardIdx];
+
+  const handleNextCard = () => {
+    setShowAnswer(false);
+    setCardIdx((prev) => (prev + 1) % study.flashcards.length);
+  };
+
+  const handlePrevCard = () => {
+    setShowAnswer(false);
+    setCardIdx((prev) => (prev - 1 + study.flashcards.length) % study.flashcards.length);
+  };
+
+  const handleSelectAnswer = (qIdx: number, oIdx: number) => {
+    if (showResults) return;
+    setSelectedAnswers((prev) => ({ ...prev, [qIdx]: oIdx }));
+  };
+
+  return (
+    <div className="glass border border-violet-500/20 rounded-3xl overflow-hidden">
+      <div className="flex items-center gap-3 px-5 pt-5 pb-3">
+        <div className="w-9 h-9 rounded-xl bg-violet-500/15 flex items-center justify-center flex-shrink-0">
+          <Brain className="w-4.5 h-4.5 text-violet-400" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-xs font-bold text-violet-400 uppercase tracking-widest">Study Agent</p>
+          <p className="text-sm text-white font-semibold truncate mt-0.5">{study.subject}</p>
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <div className="flex border-b border-surface-border px-5">
+        {(['summary', 'flashcards', 'quiz'] as const).map((tab) => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className={`py-3 text-xs font-semibold uppercase tracking-wider border-b-2 px-3 transition-colors ${
+              activeTab === tab
+                ? 'border-violet-500 text-violet-400 font-bold'
+                : 'border-transparent text-white/40 hover:text-white/60'
+            }`}
+          >
+            {tab}
+          </button>
+        ))}
+      </div>
+
+      {/* Tab Panels */}
+      <div className="p-5 min-h-[200px]">
+        {activeTab === 'summary' && (
+          <div className="space-y-3">
+            <h4 className="text-xs font-semibold text-white/50 uppercase tracking-wider mb-2">Key Highlights</h4>
+            <ul className="space-y-2.5">
+              {study.summary_points.map((pt, i) => (
+                <li key={i} className="flex gap-2.5 items-start text-sm text-white/80 leading-relaxed">
+                  <span className="w-5 h-5 rounded-full bg-violet-500/15 text-violet-400 text-[10px] font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
+                    {i + 1}
+                  </span>
+                  <span>{pt}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {activeTab === 'flashcards' && study.flashcards.length > 0 && (
+          <div className="flex flex-col items-center justify-center">
+            <div className="w-full max-w-md bg-surface-elevated/40 border border-surface-border rounded-2xl p-6 min-h-[150px] flex flex-col justify-between items-center text-center relative overflow-hidden">
+              <span className="text-[10px] text-white/20 font-mono absolute top-3 left-4">
+                Card {cardIdx + 1} of {study.flashcards.length}
+              </span>
+              <div className="my-auto py-4 w-full">
+                {!showAnswer ? (
+                  <p className="text-sm font-semibold text-white/95">{activeCard.question}</p>
+                ) : (
+                  <p className="text-sm text-violet-300 font-medium animate-fade-in">{activeCard.answer}</p>
+                )}
+              </div>
+              <button
+                onClick={() => setShowAnswer(!showAnswer)}
+                className="mt-2 text-xs font-semibold text-violet-400 hover:text-violet-300 transition-colors bg-violet-500/10 px-4 py-1.5 rounded-xl border border-violet-500/20"
+              >
+                {showAnswer ? 'Show Question' : 'Reveal Answer'}
+              </button>
+            </div>
+            <div className="flex gap-3 mt-4">
+              <button
+                onClick={handlePrevCard}
+                className="px-4 py-2 rounded-xl text-xs bg-white/5 hover:bg-white/10 text-white transition-colors"
+              >
+                Previous
+              </button>
+              <button
+                onClick={handleNextCard}
+                className="px-4 py-2 rounded-xl text-xs bg-white/5 hover:bg-white/10 text-white transition-colors"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'quiz' && study.quiz.length > 0 && (
+          <div className="space-y-6">
+            {study.quiz.map((q, qIdx) => (
+              <div key={qIdx} className="space-y-2 pb-5 border-b border-surface-border/50 last:border-0 last:pb-0">
+                <p className="text-sm text-white font-medium">
+                  {qIdx + 1}. {q.question}
+                </p>
+                <div className="grid grid-cols-1 gap-2 pt-1.5">
+                  {q.options.map((opt, oIdx) => {
+                    const isSelected = selectedAnswers[qIdx] === oIdx;
+                    const isCorrect = q.correct === oIdx;
+                    let btnStyle = 'border-surface-border bg-surface-elevated/25 text-white/70 hover:bg-surface-elevated/40';
+
+                    if (showResults) {
+                      if (isCorrect) {
+                        btnStyle = 'border-emerald-500/50 bg-emerald-500/12 text-emerald-300';
+                      } else if (isSelected) {
+                        btnStyle = 'border-red-500/50 bg-red-500/12 text-red-300';
+                      }
+                    } else if (isSelected) {
+                      btnStyle = 'border-violet-500 bg-violet-500/12 text-violet-300';
+                    }
+
+                    return (
+                      <button
+                        key={oIdx}
+                        disabled={showResults}
+                        onClick={() => handleSelectAnswer(qIdx, oIdx)}
+                        className={`text-left px-3.5 py-2.5 rounded-xl border text-xs transition-all flex items-center justify-between ${btnStyle}`}
+                      >
+                        <span>{opt}</span>
+                        {showResults && isCorrect && <Check className="w-3.5 h-3.5 text-emerald-400" />}
+                        {showResults && isSelected && !isCorrect && <X className="w-3.5 h-3.5 text-red-400" />}
+                      </button>
+                    );
+                  })}
+                </div>
+                {showResults && (
+                  <p className="text-[11px] text-white/45 bg-white/5 p-2.5 rounded-xl border border-surface-border mt-2 animate-fade-in leading-relaxed">
+                    <strong className="text-violet-400">Explanation:</strong> {q.explanation}
+                  </p>
+                )}
+              </div>
+            ))}
+
+            <div className="flex justify-end pt-2">
+              {!showResults ? (
+                <button
+                  disabled={Object.keys(selectedAnswers).length < study.quiz.length}
+                  onClick={() => setShowResults(true)}
+                  className="px-5 py-2.5 rounded-xl text-xs font-semibold bg-violet-500 hover:bg-violet-600 disabled:opacity-50 disabled:hover:bg-violet-500 text-white transition-all shadow-lg shadow-violet-500/20"
+                >
+                  Submit Quiz
+                </button>
+              ) : (
+                <button
+                  onClick={() => {
+                    setSelectedAnswers({});
+                    setShowResults(false);
+                  }}
+                  className="px-5 py-2.5 rounded-xl text-xs font-semibold bg-white/5 hover:bg-white/10 text-white transition-colors"
+                >
+                  Reset Quiz
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {study.study_tip && (
+        <div className="mx-5 mb-5 flex items-start gap-2.5 px-4 py-3 rounded-2xl bg-violet-500/8 border border-violet-500/20">
+          <Lightbulb className="w-4 h-4 text-violet-400 flex-shrink-0 mt-0.5" />
+          <p className="text-xs text-violet-300/80 leading-relaxed">{study.study_tip}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── CONTENT CARD COMPONENT ──
+function ContentCard({ content }: { content: ContentAgentOutput }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(content.draft);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy', err);
+    }
+  };
+
+  return (
+    <div className="glass border border-cyan-500/20 rounded-3xl overflow-hidden">
+      <div className="flex items-center justify-between px-5 pt-5 pb-3">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-9 h-9 rounded-xl bg-cyan-500/15 flex items-center justify-center flex-shrink-0">
+            <FileEdit className="w-4.5 h-4.5 text-cyan-400" />
+          </div>
+          <div className="min-w-0">
+            <p className="text-xs font-bold text-cyan-400 uppercase tracking-widest">Content Agent</p>
+            <p className="text-sm text-white font-semibold truncate mt-0.5">{content.subject}</p>
+          </div>
+        </div>
+        <span className="text-[10px] font-bold text-cyan-400 bg-cyan-500/10 border border-cyan-500/20 px-2.5 py-0.5 rounded-full capitalize">
+          {content.content_type.replace('_', ' ')}
+        </span>
+      </div>
+
+      {/* Editor/Draft Box */}
+      <div className="px-5 pb-4 space-y-4">
+        <div className="relative">
+          <textarea
+            readOnly
+            value={content.draft}
+            className="w-full min-h-[220px] max-h-[400px] p-4 bg-surface-elevated/40 border border-surface-border rounded-2xl text-xs font-mono text-white/80 leading-relaxed focus:outline-none overflow-y-auto resize-y"
+          />
+          <button
+            onClick={handleCopy}
+            className="absolute top-3 right-3 p-2 bg-surface border border-surface-border rounded-xl hover:border-white/10 text-white/60 hover:text-white transition-all flex items-center gap-1.5 text-[11px] font-semibold"
+          >
+            {copied ? (
+              <>
+                <Check className="w-3.5 h-3.5 text-emerald-400" />
+                Copied
+              </>
+            ) : (
+              <>
+                <Copy className="w-3.5 h-3.5" />
+                Copy Draft
+              </>
+            )}
+          </button>
+        </div>
+
+        <div className="flex flex-wrap items-center justify-between gap-3 text-[11px] text-white/35">
+          <div className="flex gap-4">
+            <span>Recipient: <strong className="text-white/60">{content.recipient}</strong></span>
+            <span>Tone: <strong className="text-white/60 capitalize">{content.tone}</strong></span>
+            <span>Words: <strong className="text-white/60">{content.word_count}</strong></span>
+          </div>
+        </div>
+      </div>
+
+      {content.usage_tip && (
+        <div className="mx-5 mb-5 flex items-start gap-2.5 px-4 py-3 rounded-2xl bg-cyan-500/8 border border-cyan-500/20">
+          <Lightbulb className="w-4 h-4 text-cyan-400 flex-shrink-0 mt-0.5" />
+          <p className="text-xs text-cyan-300/80 leading-relaxed">{content.usage_tip}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
