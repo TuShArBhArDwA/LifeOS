@@ -285,9 +285,9 @@ export default function DashboardClient({ profile, tasks, events, reminders, int
           <div className="flex items-center gap-3">
             {/* Logo */}
             <div className="relative">
-              <div className="absolute inset-0 rounded-xl bg-brand-500/30 blur-lg" />
-              <div className="relative w-8 h-8 rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center shadow-[0_0_16px_rgba(59,130,246,0.4)]">
-                <Sparkles className="w-4 h-4 text-white" />
+              <div className="absolute inset-0 rounded-full bg-brand-500/30 blur-lg" />
+              <div className="relative w-8 h-8 rounded-full bg-surface-card border border-white/8 flex items-center justify-center p-1.5 shadow-[0_0_16px_rgba(59,130,246,0.4)]">
+                <img src="/favicon.png" alt="LifeOS Logo" className="w-full h-full object-contain rounded-full" />
               </div>
             </div>
             <div>

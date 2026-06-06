@@ -201,9 +201,9 @@ export default function SettingsClient() {
           <div className="h-4 w-px bg-zinc-800" />
           <div className="flex items-center gap-2.5">
             <div className="relative">
-              <div className="absolute inset-0 rounded-lg bg-brand-500/30 blur-md" />
-              <div className="relative w-6 h-6 rounded-lg bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center">
-                <Sparkles className="w-3 h-3 text-white" />
+              <div className="absolute inset-0 rounded-full bg-brand-500/30 blur-md" />
+              <div className="relative w-6 h-6 rounded-full bg-surface-card border border-white/8 flex items-center justify-center p-1 shadow-[0_0_16px_rgba(59,130,246,0.4)]">
+                <img src="/favicon.png" alt="LifeOS Logo" className="w-full h-full object-contain rounded-full" />
               </div>
             </div>
             <span className="font-bold text-sm text-white">Settings</span>

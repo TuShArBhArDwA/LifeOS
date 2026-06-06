@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import UploadZone from '@/components/UploadZone';
 import AgentThinking from '@/components/AgentThinking';
@@ -209,16 +209,28 @@ export default function UploadPage() {
   const [state, setState] = useState<ProcessingState>('idle');
   const [result, setResult] = useState<IntakeResult | null>(null);
   const [error, setError] = useState<string>('');
+  const [apiData, setApiData] = useState<IntakeResult | null>(null);
+  const [animationDone, setAnimationDone] = useState(false);
 
   const isGuest = typeof window !== 'undefined' && (
     localStorage.getItem('lifeos_guest') === 'true' ||
     window.location.search.includes('guest=true')
   );
 
+  // Sync state transitions to ensure we show all agents finishing before displaying results
+  useEffect(() => {
+    if (apiData && animationDone) {
+      setResult(apiData);
+      setState('done');
+    }
+  }, [apiData, animationDone]);
+
   const handleUpload = async (file: File | null, text?: string) => {
     setState('processing');
     setError('');
     setResult(null);
+    setApiData(null);
+    setAnimationDone(false);
 
     try {
       let body: FormData | string;
@@ -297,15 +309,14 @@ export default function UploadPage() {
         localStorage.setItem('lifeos_guest_intakes',   JSON.stringify([newIntake,              ...storedIntakes]));
       }
 
-      setResult(data);
-      setState('done');
+      setApiData(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong');
       setState('error');
     }
   };
 
-  const handleReset = () => { setState('idle'); setResult(null); setError(''); };
+  const handleReset = () => { setState('idle'); setResult(null); setApiData(null); setAnimationDone(false); setError(''); };
 
   return (
     <div className="min-h-screen bg-[#07070a]">
@@ -446,7 +457,7 @@ export default function UploadPage() {
         {/* ── PROCESSING ── */}
         {state === 'processing' && (
           <div className="animate-fade-in">
-            <AgentThinking />
+            <AgentThinking onComplete={() => setAnimationDone(true)} />
           </div>
         )}
 

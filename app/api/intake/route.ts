@@ -119,8 +119,8 @@ export async function POST(req: NextRequest) {
       if (matchedExampleId && PRESTORED_ANSWERS[matchedExampleId]) {
         console.log(`[Intake Route] Intercepted example: ${matchedExampleId}. Serving prestored answers.`);
         
-        // Artificial delay to simulate real-time agent execution during live demo (matches 11.3s total UI phase durations)
-        await new Promise((resolve) => setTimeout(resolve, 11500));
+        // Artificial delay to simulate real-time agent execution during live demo
+        await new Promise((resolve) => setTimeout(resolve, 15500));
 
         const mockData = PRESTORED_ANSWERS[matchedExampleId];
         let intakeId = 'guest_intake_' + Date.now();
