@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import InstallPWA from '@/components/InstallPWA';
 import { useEffect, useRef, useState } from 'react';
 import { UserButton } from '@clerk/nextjs';
 import { format, parseISO, isToday, isTomorrow, isPast, differenceInDays } from 'date-fns';
@@ -155,6 +156,7 @@ export default function DashboardClient({ profile, tasks, events, reminders, int
 
   return (
     <div className="min-h-screen bg-surface">
+      <InstallPWA />
 
       {/* ── Background decoration ── */}
       <div className="fixed top-0 left-0 right-0 h-[500px] pointer-events-none overflow-hidden z-0">
