@@ -489,7 +489,7 @@ export default function UploadPage() {
                 New upload
               </button>
               <Link
-                href="/dashboard"
+                href={isGuest ? "/dashboard?guest=true" : "/dashboard"}
                 id="done-dashboard-btn"
                 className="flex-1 flex items-center justify-center gap-2 py-4 bg-brand-500 hover:bg-brand-600 text-white rounded-2xl font-semibold text-sm text-center transition-all hover:shadow-brand hover:scale-[1.02] active:scale-95"
               >

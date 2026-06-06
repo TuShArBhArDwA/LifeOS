@@ -158,18 +158,32 @@ export default function DashboardClient({ profile, tasks, events, reminders, int
   useEffect(() => {
     setIsClient(true);
     if (profile.id === 'guest_user') {
-      // Always start fresh — clear any old guest data on every visit
-      localStorage.removeItem('lifeos_guest_tasks');
-      localStorage.removeItem('lifeos_guest_events');
-      localStorage.removeItem('lifeos_guest_reminders');
-      localStorage.removeItem('lifeos_guest_intakes');
       localStorage.setItem('lifeos_guest', 'true');
 
-      // Start with completely empty state
-      setLocalTasks([]);
-      setLocalEvents([]);
-      setLocalReminders([]);
-      setLocalIntakes([]);
+      // Load items that were saved during the intake session
+      const gTasks = JSON.parse(localStorage.getItem('lifeos_guest_tasks') || '[]');
+      const gEvents = JSON.parse(localStorage.getItem('lifeos_guest_events') || '[]');
+      const gReminders = JSON.parse(localStorage.getItem('lifeos_guest_reminders') || '[]');
+      const gIntakes = JSON.parse(localStorage.getItem('lifeos_guest_intakes') || '[]');
+
+      setLocalTasks(gTasks);
+      setLocalEvents(gEvents);
+      setLocalReminders(gReminders);
+      setLocalIntakes(gIntakes);
+
+      // Clean up when leaving or refreshing (start fresh)
+      const clearGuestData = () => {
+        localStorage.removeItem('lifeos_guest_tasks');
+        localStorage.removeItem('lifeos_guest_events');
+        localStorage.removeItem('lifeos_guest_reminders');
+        localStorage.removeItem('lifeos_guest_intakes');
+        localStorage.removeItem('lifeos_guest');
+      };
+
+      window.addEventListener('beforeunload', clearGuestData);
+      return () => {
+        window.removeEventListener('beforeunload', clearGuestData);
+      };
     } else {
       localStorage.setItem('lifeos_guest', 'false');
     }
