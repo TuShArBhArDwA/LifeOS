@@ -6,7 +6,7 @@ import Link from 'next/link';
 import UploadZone from '@/components/UploadZone';
 import AgentThinking from '@/components/AgentThinking';
 import { TasksCard, EventsCard, PlacementCard, RemindersCard } from '@/components/ActionCards';
-import { AlertCircle, Sparkles } from 'lucide-react';
+import { AlertCircle, Sparkles, Briefcase, BookOpen, Calendar } from 'lucide-react';
 import type { GeneratedTask } from '@/lib/agents/task-agent';
 import type { GeneratedEvent } from '@/lib/agents/schedule-agent';
 import type { PlacementAgentOutput } from '@/lib/agents/placement-agent';
@@ -118,17 +118,20 @@ export default function UploadPage() {
                 {[
                   {
                     id: 'example-tcs',
-                    label: '🏢 Placement notice',
+                    icon: <Briefcase className="w-4 h-4 text-brand-400" />,
+                    label: 'Placement notice',
                     text: 'TCS NQT Drive — Register by June 7, 2026. Eligibility: 60% aggregate, No active backlogs. Required documents: Updated resume, College ID, 10th & 12th marksheets. Venue: Auditorium A. Reporting time: 9:00 AM.',
                   },
                   {
                     id: 'example-assignment',
-                    label: '📚 Assignment deadline',
+                    icon: <BookOpen className="w-4 h-4 text-brand-400" />,
+                    label: 'Assignment deadline',
                     text: 'DBMS Mini Project submission is due this Friday. You need to submit a working prototype + 5-page report to the college portal. Late submissions will not be accepted.',
                   },
                   {
                     id: 'example-exam',
-                    label: '📝 Exam schedule',
+                    icon: <Calendar className="w-4 h-4 text-brand-400" />,
+                    label: 'Exam schedule',
                     text: 'End Semester Exams start June 15, 2026. Data Structures: June 15, Operating Systems: June 18, Computer Networks: June 20, DBMS: June 22. Exam time: 10 AM - 1 PM.',
                   },
                 ].map((ex) => (
@@ -136,9 +139,10 @@ export default function UploadPage() {
                     key={ex.id}
                     id={ex.id}
                     onClick={() => handleUpload(null, ex.text)}
-                    className="w-full text-left px-4 py-3 glass border border-surface-border rounded-2xl text-sm text-white/60 hover:text-white hover:border-brand-500/30 transition-all"
+                    className="w-full text-left px-4 py-3 glass border border-surface-border rounded-2xl text-sm text-white/60 hover:text-white hover:border-brand-500/30 transition-all flex items-center gap-2.5"
                   >
-                    {ex.label}
+                    {ex.icon}
+                    <span>{ex.label}</span>
                   </button>
                 ))}
               </div>
