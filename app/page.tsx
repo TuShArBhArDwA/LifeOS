@@ -1,8 +1,7 @@
 import Link from 'next/link';
 import { SignInButton, SignUpButton } from '@clerk/nextjs';
 import { auth } from '@clerk/nextjs/server';
-import { redirect } from 'next/navigation';
-import { Camera, Brain, Zap, CheckCircle2 } from 'lucide-react';
+import { Camera, Brain, Zap, CheckCircle2, Cpu, CheckSquare, Target, Calendar, Bell } from 'lucide-react';
 
 export default async function LandingPage() {
   const { userId } = await auth();
@@ -96,6 +95,55 @@ export default async function LandingPage() {
               <div className="text-xs text-brand-400 font-mono mb-1">{item.step}</div>
               <div className="font-semibold mb-2">{item.title}</div>
               <div className="text-sm text-white/50">{item.desc}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Five Specialized Agents */}
+      <section className="relative z-10 px-6 py-12 max-w-5xl mx-auto w-full">
+        <div className="text-center mb-12">
+          <h2 className="text-2xl sm:text-3xl font-bold mb-3">Five Specialized Agents, One Unified Brain</h2>
+          <p className="text-sm text-white/50 max-w-xl mx-auto">
+            LifeOS orchestrates five dedicated intelligence layers that coordinate in parallel to manage your tasks, placement status, schedules, and alerts.
+          </p>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4">
+          {[
+            {
+              icon: <Cpu className="w-5 h-5 text-brand-400" />,
+              title: 'Orchestrator',
+              desc: 'Parses inputs, classifies intent, and coordinates parallel execution.'
+            },
+            {
+              icon: <CheckSquare className="w-5 h-5 text-brand-400" />,
+              title: 'Task Agent',
+              desc: 'Extracts deadlines, assigns priority scores, and creates time-blocked tasks.'
+            },
+            {
+              icon: <Target className="w-5 h-5 text-brand-400" />,
+              title: 'Placement Agent',
+              desc: 'Monitors notices, checks eligibility, and schedules mock interviews.'
+            },
+            {
+              icon: <Calendar className="w-5 h-5 text-brand-400" />,
+              title: 'Schedule Agent',
+              desc: 'Auto-builds weekly timetables synced to classes and deadlines.'
+            },
+            {
+              icon: <Bell className="w-5 h-5 text-brand-400" />,
+              title: 'Reminder Agent',
+              desc: 'Context-aware alerts explaining why it matters and if it is missed.'
+            }
+          ].map((agent, index) => (
+            <div key={index} className="glass rounded-2xl p-5 border border-surface-border hover:border-brand-500/30 transition-all flex flex-col justify-between">
+              <div>
+                <div className="w-9 h-9 rounded-xl bg-brand-500/10 flex items-center justify-center mb-4">
+                  {agent.icon}
+                </div>
+                <h3 className="font-semibold text-white text-sm mb-1">{agent.title}</h3>
+              </div>
+              <p className="text-[11px] text-white/40 leading-relaxed mt-2">{agent.desc}</p>
             </div>
           ))}
         </div>
