@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next';
+import Script from 'next/script';
 import { ClerkProvider } from '@clerk/nextjs';
 import './globals.css';
 
@@ -76,7 +77,9 @@ export default function RootLayout({
           <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
 
           {/* App version guard: wipe stale guest data on deploy */}
-          <script
+          <Script
+            id="app-version-guard"
+            strategy="beforeInteractive"
             dangerouslySetInnerHTML={{
               __html: `
                 var APP_VERSION = 'v3';
@@ -92,7 +95,9 @@ export default function RootLayout({
             }}
           />
           {/* Service Worker registration */}
-          <script
+          <Script
+            id="service-worker-reg"
+            strategy="afterInteractive"
             dangerouslySetInnerHTML={{
               __html: `
                 if ('serviceWorker' in navigator) {
