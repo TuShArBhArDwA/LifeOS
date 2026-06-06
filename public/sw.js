@@ -8,8 +8,6 @@ const STATIC_ASSETS = [
   '/upload',
   '/manifest.json',
   '/favicon.png',
-  '/icon-192.png',
-  '/icon-512.png',
 ];
 
 // ── Install: pre-cache shell assets ──────────────────────────────

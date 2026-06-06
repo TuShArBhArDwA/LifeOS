@@ -57,7 +57,7 @@ export default function InstallPWA() {
         <div className="p-4">
           <div className="flex items-start gap-3">
             <div className="w-10 h-10 rounded-xl bg-brand-500/15 border border-brand-500/25 flex items-center justify-center flex-shrink-0">
-              <img src="/icon-192.png" alt="LifeOS" className="w-6 h-6 rounded-lg object-contain" />
+              <img src="/favicon.png" alt="LifeOS" className="w-7 h-7 rounded-lg object-contain" />
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-bold text-white">Install LifeOS</p>
