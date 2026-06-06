@@ -41,6 +41,9 @@ const INTENT_CONFIG: Record<string, { label: string; color: string; bg: string }
   exam:             { label: 'Exam',        color: 'text-red-400',    bg: 'bg-red-500/10 border-red-500/20' },
   timetable:        { label: 'Timetable',  color: 'text-yellow-400',  bg: 'bg-yellow-500/10 border-yellow-500/20' },
   fee_notice:       { label: 'Fee',         color: 'text-orange-400', bg: 'bg-orange-500/10 border-orange-500/20' },
+  expense_receipt:  { label: 'Expense',     color: 'text-pink-400',   bg: 'bg-pink-500/10 border-pink-500/20' },
+  study_notes:      { label: 'Study Kit',    color: 'text-violet-400', bg: 'bg-violet-500/10 border-violet-500/20' },
+  content_request:  { label: 'Draft Ready',  color: 'text-cyan-400',   bg: 'bg-cyan-500/10 border-cyan-500/20' },
   general:          { label: 'General',    color: 'text-white/50',    bg: 'bg-white/5 border-white/10' },
 };
 
@@ -493,9 +496,9 @@ export default function DashboardClient({ profile, tasks, events, reminders, int
                 <SectionHeader title="Quick Actions" />
                 <div className="space-y-2">
                   {[
-                    { href: '/upload', icon: Camera,   label: 'New capture',      sub: 'Upload or paste content',  accent: true },
-                    { href: '/upload', icon: Target,   label: 'Placement notice', sub: 'Check eligibility',        accent: false },
-                    { href: '/upload', icon: BookOpen, label: 'Study material',   sub: 'Build a study plan',       accent: false },
+                    { href: isGuestMode ? '/upload?guest=true' : '/upload', icon: Camera,   label: 'New capture',      sub: 'Upload or paste content',  accent: true },
+                    { href: isGuestMode ? '/upload?guest=true' : '/upload', icon: Target,   label: 'Placement notice', sub: 'Check eligibility',        accent: false },
+                    { href: isGuestMode ? '/upload?guest=true' : '/upload', icon: BookOpen, label: 'Study material',   sub: 'Build a study plan',       accent: false },
                   ].map((action, i) => (
                     <Link
                       key={i}
@@ -527,7 +530,7 @@ export default function DashboardClient({ profile, tasks, events, reminders, int
       {/* ── Floating capture button ── */}
       <div className="fixed bottom-6 right-6 z-30">
         <Link
-          href="/upload"
+          href={isGuestMode ? "/upload?guest=true" : "/upload"}
           id="fab-upload-btn"
           className="group flex items-center gap-2 bg-gradient-to-r from-brand-500 to-brand-600 text-white px-5 py-3.5 rounded-2xl font-semibold shadow-brand hover:shadow-[0_0_30px_rgba(59,130,246,0.5)] transition-all hover:scale-105 active:scale-95"
         >
