@@ -8,12 +8,13 @@ import { TasksCard, EventsCard, PlacementCard, RemindersCard } from '@/component
 import {
   AlertCircle, Sparkles, Briefcase, BookOpen,
   Calendar, ArrowLeft, Plus, CheckCircle2,
-  ChevronRight, Zap, Target
+  ChevronRight, Zap, Target, IndianRupee, TrendingDown, Lightbulb
 } from 'lucide-react';
 import type { GeneratedTask } from '@/lib/agents/task-agent';
 import type { GeneratedEvent } from '@/lib/agents/schedule-agent';
 import type { PlacementAgentOutput } from '@/lib/agents/placement-agent';
 import type { GeneratedReminder } from '@/lib/agents/reminder-agent';
+import type { ExpenseAgentOutput } from '@/lib/agents/expense-agent';
 
 type ProcessingState = 'idle' | 'processing' | 'done' | 'error';
 
@@ -23,16 +24,75 @@ type IntakeResult = {
   events: GeneratedEvent[];
   placement: PlacementAgentOutput | null;
   reminders: GeneratedReminder[];
+  expense: ExpenseAgentOutput | null;
 };
 
 const INTENT_LABELS: Record<string, { label: string; color: string; bg: string }> = {
-  placement_notice: { label: 'Placement',  color: 'text-emerald-400', bg: 'bg-emerald-500/12 border-emerald-500/25' },
-  assignment:       { label: 'Assignment', color: 'text-brand-400',   bg: 'bg-brand-500/12 border-brand-500/25' },
-  exam:             { label: 'Exam',       color: 'text-red-400',     bg: 'bg-red-500/12 border-red-500/25' },
-  timetable:        { label: 'Timetable',  color: 'text-yellow-400',  bg: 'bg-yellow-500/12 border-yellow-500/25' },
-  fee_notice:       { label: 'Fee Notice', color: 'text-orange-400',  bg: 'bg-orange-500/12 border-orange-500/25' },
-  general:          { label: 'General',    color: 'text-white/50',    bg: 'bg-white/5 border-white/10' },
+  placement_notice: { label: 'Placement',    color: 'text-emerald-400', bg: 'bg-emerald-500/12 border-emerald-500/25' },
+  assignment:       { label: 'Assignment',   color: 'text-brand-400',   bg: 'bg-brand-500/12 border-brand-500/25' },
+  exam:             { label: 'Exam',         color: 'text-red-400',     bg: 'bg-red-500/12 border-red-500/25' },
+  timetable:        { label: 'Timetable',    color: 'text-yellow-400',  bg: 'bg-yellow-500/12 border-yellow-500/25' },
+  fee_notice:       { label: 'Fee Notice',   color: 'text-orange-400',  bg: 'bg-orange-500/12 border-orange-500/25' },
+  expense_receipt:  { label: '💸 Expense',   color: 'text-pink-400',    bg: 'bg-pink-500/12 border-pink-500/25' },
+  general:          { label: 'General',      color: 'text-white/50',    bg: 'bg-white/5 border-white/10' },
 };
+
+const CATEGORY_COLORS: Record<string, string> = {
+  food:          'bg-orange-500/15 text-orange-300 border-orange-500/25',
+  transport:     'bg-blue-500/15 text-blue-300 border-blue-500/25',
+  books:         'bg-brand-500/15 text-brand-300 border-brand-500/25',
+  education:     'bg-purple-500/15 text-purple-300 border-purple-500/25',
+  shopping:      'bg-pink-500/15 text-pink-300 border-pink-500/25',
+  health:        'bg-emerald-500/15 text-emerald-300 border-emerald-500/25',
+  entertainment: 'bg-yellow-500/15 text-yellow-300 border-yellow-500/25',
+  other:         'bg-white/5 text-white/40 border-white/10',
+};
+
+function ExpenseCard({ expense }: { expense: ExpenseAgentOutput }) {
+  return (
+    <div className="glass border border-pink-500/20 rounded-3xl overflow-hidden">
+      <div className="flex items-center gap-3 px-5 pt-5 pb-3">
+        <div className="w-9 h-9 rounded-xl bg-pink-500/15 flex items-center justify-center flex-shrink-0">
+          <IndianRupee className="w-4.5 h-4.5 text-pink-400" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-xs font-bold text-pink-400 uppercase tracking-widest">Expense Agent</p>
+          <p className="text-sm text-white/70 truncate mt-0.5">{expense.summary}</p>
+        </div>
+        <div className="text-right flex-shrink-0">
+          <p className="text-lg font-bold text-white">₹{expense.total.toLocaleString('en-IN')}</p>
+          <p className="text-[10px] text-white/30">Total</p>
+        </div>
+      </div>
+
+      <div className="px-5 pb-4 space-y-2">
+        {expense.expenses.map((item, i) => (
+          <div key={i} className="flex items-center justify-between gap-3 py-2.5 border-b border-surface-border last:border-0">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <span className={`px-2 py-0.5 rounded-lg text-[10px] font-bold border capitalize flex-shrink-0 ${
+                CATEGORY_COLORS[item.category] ?? CATEGORY_COLORS.other
+              }`}>
+                {item.category}
+              </span>
+              <div className="min-w-0">
+                <p className="text-sm text-white font-medium truncate">{item.merchant}</p>
+                <p className="text-[11px] text-white/35 truncate">{item.description}</p>
+              </div>
+            </div>
+            <p className="text-sm font-semibold text-white flex-shrink-0">₹{item.amount.toLocaleString('en-IN')}</p>
+          </div>
+        ))}
+      </div>
+
+      {expense.budget_tip && (
+        <div className="mx-5 mb-5 flex items-start gap-2.5 px-4 py-3 rounded-2xl bg-yellow-500/8 border border-yellow-500/20">
+          <Lightbulb className="w-4 h-4 text-yellow-400 flex-shrink-0 mt-0.5" />
+          <p className="text-xs text-yellow-300/80 leading-relaxed">{expense.budget_tip}</p>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function UploadPage() {
   const [state, setState] = useState<ProcessingState>('idle');
@@ -220,7 +280,7 @@ export default function UploadPage() {
               <p className="text-[10px] text-white/25 uppercase tracking-widest font-semibold mb-3 text-center">
                 Try an example
               </p>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                 {[
                   {
                     id: 'example-tcs',
@@ -248,6 +308,15 @@ export default function UploadPage() {
                     color: 'text-red-400',
                     bg: 'hover:border-red-500/30 hover:bg-red-500/5',
                     text: 'End Semester Exams start June 15, 2026. Data Structures: June 15, Operating Systems: June 18, Computer Networks: June 20, DBMS: June 22. Exam time: 10 AM - 1 PM.',
+                  },
+                  {
+                    id: 'example-expense',
+                    icon: TrendingDown,
+                    label: 'Expense receipt',
+                    sub: 'Track spending',
+                    color: 'text-pink-400',
+                    bg: 'hover:border-pink-500/30 hover:bg-pink-500/5',
+                    text: 'Spent today: Canteen lunch ₹80, Auto to college ₹45, Xerox of notes ₹30, Amazon order — DSA book ₹350. Total: ₹505.',
                   },
                 ].map((ex) => (
                   <button
@@ -376,6 +445,7 @@ export default function UploadPage() {
             </div>
 
             {/* Agent output cards */}
+            {result.expense && <ExpenseCard expense={result.expense} />}
             <TasksCard tasks={result.tasks} />
             <EventsCard events={result.events} />
             {result.placement && <PlacementCard placement={result.placement} />}

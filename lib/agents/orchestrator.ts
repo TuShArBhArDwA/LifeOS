@@ -3,10 +3,10 @@ import { groqJSON } from '@/lib/groq';
 import type { Profile } from '@/lib/supabase';
 
 export type OrchestratorOutput = {
-  intent: 'placement_notice' | 'assignment' | 'exam' | 'timetable' | 'general' | 'fee_notice';
+  intent: 'placement_notice' | 'assignment' | 'exam' | 'timetable' | 'general' | 'fee_notice' | 'expense_receipt';
   confidence: number;
   summary: string;
-  invoke_agents: Array<'task' | 'schedule' | 'placement' | 'reminder'>;
+  invoke_agents: Array<'task' | 'schedule' | 'placement' | 'reminder' | 'expense'>;
   extracted: {
     company?: string;
     deadline?: string; // ISO date string
@@ -45,10 +45,10 @@ Your job: Analyze the provided content and return a structured JSON object.
 
 Return ONLY valid JSON matching this exact schema:
 {
-  "intent": "placement_notice" | "assignment" | "exam" | "timetable" | "general" | "fee_notice",
+  "intent": "placement_notice" | "assignment" | "exam" | "timetable" | "general" | "fee_notice" | "expense_receipt",
   "confidence": 0.0-1.0,
   "summary": "One sentence summary for the student",
-  "invoke_agents": ["task", "schedule", "placement", "reminder"],
+  "invoke_agents": ["task", "schedule", "placement", "reminder", "expense"],
   "extracted": {
     "company": "string or null",
     "deadline": "YYYY-MM-DD or null",
@@ -76,6 +76,7 @@ Rules:
 - For general, include task + reminder
 - Dates must be in YYYY-MM-DD format
 - If a date is relative (e.g., "this Friday"), resolve it from today's date
+- For expense_receipt, invoke only ["expense"]
 `;
 
 export async function runOrchestrator(

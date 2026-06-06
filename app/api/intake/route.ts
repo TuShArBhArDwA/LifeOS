@@ -6,6 +6,7 @@ import { runTaskAgent } from '@/lib/agents/task-agent';
 import { runScheduleAgent } from '@/lib/agents/schedule-agent';
 import { runPlacementAgent } from '@/lib/agents/placement-agent';
 import { runReminderAgent } from '@/lib/agents/reminder-agent';
+import { runExpenseAgent } from '@/lib/agents/expense-agent';
 import type { Profile } from '@/lib/supabase';
 
 export async function POST(req: NextRequest) {
@@ -103,7 +104,7 @@ export async function POST(req: NextRequest) {
     // Step 2: Run agents in parallel based on orchestrator decision
     const agentsToRun = orchestratorOutput.invoke_agents;
 
-    const [taskResult, scheduleResult, placementResult, reminderResult] = await Promise.allSettled([
+    const [taskResult, scheduleResult, placementResult, reminderResult, expenseResult] = await Promise.allSettled([
       agentsToRun.includes('task')
         ? runTaskAgent(profile as Profile, orchestratorOutput)
         : Promise.resolve(null),
@@ -116,12 +117,16 @@ export async function POST(req: NextRequest) {
       agentsToRun.includes('reminder')
         ? runReminderAgent(profile as Profile, orchestratorOutput)
         : Promise.resolve(null),
+      agentsToRun.includes('expense') && orchestratorOutput.intent === 'expense_receipt'
+        ? runExpenseAgent(profile as Profile, imageBase64, mimeType, textInput)
+        : Promise.resolve(null),
     ]);
 
     const tasks = taskResult.status === 'fulfilled' ? taskResult.value : null;
     const schedule = scheduleResult.status === 'fulfilled' ? scheduleResult.value : null;
     const placement = placementResult.status === 'fulfilled' ? placementResult.value : null;
     const reminders = reminderResult.status === 'fulfilled' ? reminderResult.value : null;
+    const expense = expenseResult.status === 'fulfilled' ? expenseResult.value : null;
 
     // Step 3: Save to Supabase (only for authenticated users)
     let intakeId = 'guest_intake_' + Date.now();
@@ -192,6 +197,7 @@ export async function POST(req: NextRequest) {
       events: schedule?.events ?? [],
       placement: placement ?? null,
       reminders: reminders?.reminders ?? [],
+      expense: expense ?? null,
       intake_id: intakeId,
     });
   } catch (error) {
