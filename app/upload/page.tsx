@@ -39,6 +39,11 @@ export default function UploadPage() {
   const [result, setResult] = useState<IntakeResult | null>(null);
   const [error, setError] = useState<string>('');
 
+  const isGuest = typeof window !== 'undefined' && (
+    localStorage.getItem('lifeos_guest') === 'true' ||
+    window.location.search.includes('guest=true')
+  );
+
   const handleUpload = async (file: File | null, text?: string) => {
     setState('processing');
     setError('');
@@ -59,10 +64,18 @@ export default function UploadPage() {
         throw new Error('No input provided');
       }
 
+      const headers: Record<string, string> = {};
+      if (contentType) {
+        headers['Content-Type'] = contentType;
+      }
+      if (isGuest) {
+        headers['x-guest-mode'] = 'true';
+      }
+
       const res = await fetch('/api/intake', {
         method: 'POST',
         body,
-        headers: contentType ? { 'Content-Type': contentType } : undefined,
+        headers,
       });
 
       if (!res.ok) {
@@ -74,6 +87,62 @@ export default function UploadPage() {
       }
 
       const data = await res.json();
+
+      // If guest, store result to localStorage
+      if (isGuest && typeof window !== 'undefined') {
+        const storedTasks = JSON.parse(localStorage.getItem('lifeos_guest_tasks') || '[]');
+        const storedEvents = JSON.parse(localStorage.getItem('lifeos_guest_events') || '[]');
+        const storedReminders = JSON.parse(localStorage.getItem('lifeos_guest_reminders') || '[]');
+        const storedIntakes = JSON.parse(localStorage.getItem('lifeos_guest_intakes') || '[]');
+
+        // Format and append incoming values
+        const formattedTasks = (data.tasks || []).map((t: any, idx: number) => ({
+          id: `task_new_${Date.now()}_${idx}`,
+          user_id: 'guest_user',
+          title: t.title,
+          description: t.description,
+          priority: t.priority,
+          due_date: t.due_date,
+          status: 'pending',
+          agent_source: t.agent_source || 'task_agent',
+          created_at: new Date().toISOString()
+        }));
+
+        const formattedEvents = (data.events || []).map((e: any, idx: number) => ({
+          id: `event_new_${Date.now()}_${idx}`,
+          user_id: 'guest_user',
+          title: e.title,
+          start_time: e.start_time,
+          end_time: e.end_time,
+          event_type: e.event_type,
+          description: e.description,
+          created_at: new Date().toISOString()
+        }));
+
+        const formattedReminders = (data.reminders || []).map((r: any, idx: number) => ({
+          id: `rem_new_${Date.now()}_${idx}`,
+          user_id: 'guest_user',
+          message: r.message,
+          remind_at: r.remind_at,
+          sent: false
+        }));
+
+        const newIntake = {
+          id: data.intake_id || `intake_new_${Date.now()}`,
+          user_id: 'guest_user',
+          input_type: file ? 'screenshot' : 'text',
+          intent: data.orchestrator?.intent || 'general',
+          summary: data.orchestrator?.summary || 'Mock summary',
+          raw_extracted: data.orchestrator?.extracted || {},
+          created_at: new Date().toISOString()
+        };
+
+        localStorage.setItem('lifeos_guest_tasks', JSON.stringify([...formattedTasks, ...storedTasks]));
+        localStorage.setItem('lifeos_guest_events', JSON.stringify([...formattedEvents, ...storedEvents]));
+        localStorage.setItem('lifeos_guest_reminders', JSON.stringify([...formattedReminders, ...storedReminders]));
+        localStorage.setItem('lifeos_guest_intakes', JSON.stringify([newIntake, ...storedIntakes]));
+      }
+
       setResult(data);
       setState('done');
     } catch (err) {
@@ -101,7 +170,7 @@ export default function UploadPage() {
         <div className="flex items-center justify-between px-6 py-4 max-w-3xl mx-auto">
           <div className="flex items-center gap-3">
             <Link
-              href="/dashboard"
+              href={isGuest ? "/dashboard?guest=true" : "/dashboard"}
               id="upload-back-btn"
               className="w-9 h-9 rounded-xl bg-surface-elevated border border-surface-border flex items-center justify-center text-white/50 hover:text-white hover:border-white/20 transition-all"
             >

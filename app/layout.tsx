@@ -10,11 +10,11 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       { url: '/favicon.png', type: 'image/png' },
-      { url: '/icon-192.png', sizes: '192x192', type: 'image/png' },
-      { url: '/icon-512.png', sizes: '512x512', type: 'image/png' },
+      { url: '/favicon.png', sizes: '192x192', type: 'image/png' },
+      { url: '/favicon.png', sizes: '512x512', type: 'image/png' },
     ],
     apple: [
-      { url: '/icon-192.png', sizes: '192x192', type: 'image/png' },
+      { url: '/favicon.png', sizes: '192x192', type: 'image/png' },
     ],
   },
   appleWebApp: {
@@ -57,19 +57,19 @@ export default function RootLayout({
           <meta name="apple-mobile-web-app-title" content="LifeOS" />
 
           {/* Apple touch icons */}
-          <link rel="apple-touch-icon" href="/icon-192.png" />
-          <link rel="apple-touch-icon" sizes="192x192" href="/icon-192.png" />
-          <link rel="apple-touch-icon" sizes="512x512" href="/icon-512.png" />
+          <link rel="apple-touch-icon" href="/favicon.png" />
+          <link rel="apple-touch-icon" sizes="192x192" href="/favicon.png" />
+          <link rel="apple-touch-icon" sizes="512x512" href="/favicon.png" />
 
           {/* Android / Chrome */}
-          <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
-          <link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png" />
+          <link rel="icon" type="image/png" sizes="192x192" href="/favicon.png" />
+          <link rel="icon" type="image/png" sizes="512x512" href="/favicon.png" />
           <link rel="shortcut icon" href="/favicon.png" />
 
           {/* Splash screen colour for Android */}
           <meta name="theme-color" content="#09090b" />
           <meta name="msapplication-TileColor" content="#09090b" />
-          <meta name="msapplication-TileImage" content="/icon-192.png" />
+          <meta name="msapplication-TileImage" content="/favicon.png" />
 
           {/* Fonts preconnect */}
           <link rel="preconnect" href="https://fonts.googleapis.com" />

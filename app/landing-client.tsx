@@ -143,13 +143,16 @@ export default function LandingClient() {
           <span className="font-bold text-xl tracking-tight">LifeOS</span>
         </div>
         <div className="flex items-center gap-3">
+          <Link href="/dashboard?guest=true" id="nav-guest-btn" className="text-xs sm:text-sm text-white/55 hover:text-white transition-colors px-3 py-2 rounded-xl hover:bg-surface-elevated font-medium">
+            Continue as Guest
+          </Link>
           <SignInButton mode="modal">
-            <button id="nav-signin-btn" className="text-sm text-white/55 hover:text-white transition-colors px-4 py-2 rounded-xl hover:bg-surface-elevated">
+            <button id="nav-signin-btn" className="text-xs sm:text-sm text-white/55 hover:text-white transition-colors px-3 py-2 rounded-xl hover:bg-surface-elevated font-medium">
               Sign in
             </button>
           </SignInButton>
           <SignUpButton mode="modal">
-            <button id="nav-signup-btn" className="text-sm bg-brand-500 hover:bg-brand-600 text-white px-5 py-2.5 rounded-xl font-semibold transition-all hover:shadow-brand hover:scale-105 active:scale-95 flex items-center gap-1.5">
+            <button id="nav-signup-btn" className="text-xs sm:text-sm bg-brand-500 hover:bg-brand-600 text-white px-4 py-2 rounded-xl font-semibold transition-all hover:shadow-brand hover:scale-105 active:scale-95 flex items-center gap-1.5">
               Get started <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </SignUpButton>
@@ -198,11 +201,11 @@ export default function LandingClient() {
               </button>
             </SignUpButton>
             <Link
-              href="#how-it-works"
-              id="hero-learn-btn"
-              className="px-9 py-4 glass border border-white/10 text-white/65 hover:text-white rounded-2xl font-medium text-lg transition-all hover:border-brand-500/40 hover:bg-brand-500/5"
+              href="/dashboard?guest=true"
+              id="hero-guest-btn"
+              className="px-9 py-4 glass border border-brand-500/25 hover:border-brand-500/50 text-brand-300 hover:text-white rounded-2xl font-semibold text-lg transition-all hover:bg-brand-500/10 flex items-center justify-center gap-2"
             >
-              See how it works
+              Continue as Guest <Sparkles className="w-5 h-5 text-brand-400" />
             </Link>
           </div>
 

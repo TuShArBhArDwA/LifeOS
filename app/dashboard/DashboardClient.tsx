@@ -146,11 +146,167 @@ function SectionHeader({ title, count, href, hrefLabel }: {
 
 /* ─── Main dashboard ─────────────────────────────────────────────── */
 export default function DashboardClient({ profile, tasks, events, reminders, intakes }: Props) {
-  const pendingTasks    = tasks.filter((t) => t.status === 'pending');
+  const [localTasks, setLocalTasks] = useState<Task[]>(tasks);
+  const [localEvents, setLocalEvents] = useState<CalendarEvent[]>(events);
+  const [localReminders, setLocalReminders] = useState<Reminder[]>(reminders);
+  const [localIntakes, setLocalIntakes] = useState<Intake[]>(intakes);
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+    if (profile.id === 'guest_user') {
+      // Mark guest mode locally so upload page can read it too
+      localStorage.setItem('lifeos_guest', 'true');
+
+      const storedTasks = localStorage.getItem('lifeos_guest_tasks');
+      const storedEvents = localStorage.getItem('lifeos_guest_events');
+      const storedReminders = localStorage.getItem('lifeos_guest_reminders');
+      const storedIntakes = localStorage.getItem('lifeos_guest_intakes');
+
+      if (storedTasks && storedEvents && storedReminders && storedIntakes) {
+        setLocalTasks(JSON.parse(storedTasks));
+        setLocalEvents(JSON.parse(storedEvents));
+        setLocalReminders(JSON.parse(storedReminders));
+        setLocalIntakes(JSON.parse(storedIntakes));
+      } else {
+        // Pre-populate with beautiful premium mock data for the demo
+        const mockTasks: Task[] = [
+          {
+            id: 'task_1',
+            user_id: 'guest_user',
+            title: 'Complete TCS NQT Aptitude Mock Test',
+            description: 'Practice the quantitative and logical reasoning mock test on PrepInsta for TCS NQT prep.',
+            priority: 1,
+            due_date: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+            status: 'pending',
+            agent_source: 'task_agent',
+            created_at: new Date().toISOString()
+          },
+          {
+            id: 'task_2',
+            user_id: 'guest_user',
+            title: 'Refactor Resume with React project details',
+            description: 'Add the recent Next.js/Tailwind portfolio project under projects section.',
+            priority: 2,
+            due_date: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+            status: 'pending',
+            agent_source: 'task_agent',
+            created_at: new Date().toISOString()
+          },
+          {
+            id: 'task_3',
+            user_id: 'guest_user',
+            title: 'Submit Operating Systems Assignment',
+            description: 'Draft the answers for Process Synchronization and CPU Scheduling theory questions.',
+            priority: 2,
+            due_date: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+            status: 'pending',
+            agent_source: 'task_agent',
+            created_at: new Date().toISOString()
+          }
+        ];
+
+        const mockEvents: CalendarEvent[] = [
+          {
+            id: 'event_1',
+            user_id: 'guest_user',
+            title: 'TCS NQT Registration Deadline',
+            start_time: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] + 'T23:59:00',
+            event_type: 'deadline',
+            description: 'Registration closes on the NextStep portal.',
+            created_at: new Date().toISOString()
+          },
+          {
+            id: 'event_2',
+            user_id: 'guest_user',
+            title: 'Study: CPU Scheduling Algorithms',
+            start_time: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] + 'T19:00:00',
+            end_time: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] + 'T21:00:00',
+            event_type: 'study_block',
+            description: '2-hour focused study block.',
+            created_at: new Date().toISOString()
+          },
+          {
+            id: 'event_3',
+            user_id: 'guest_user',
+            title: 'TCS Placement Prep Webinar',
+            start_time: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] + 'T14:00:00',
+            end_time: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] + 'T15:30:00',
+            event_type: 'interview',
+            description: 'Live interactive Q&A session with placement cell.',
+            created_at: new Date().toISOString()
+          }
+        ];
+
+        const mockReminders: Reminder[] = [
+          {
+            id: 'rem_1',
+            user_id: 'guest_user',
+            message: '🔥 TCS NQT Registration closes soon. Complete verification!',
+            remind_at: new Date(Date.now() + 12 * 60 * 60 * 1000).toISOString(),
+            sent: false
+          },
+          {
+            id: 'rem_2',
+            user_id: 'guest_user',
+            message: '💡 Tip: Highlight core DSA achievements in your resume',
+            remind_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+            sent: false
+          }
+        ];
+
+        const mockIntakes: Intake[] = [
+          {
+            id: 'intake_1',
+            user_id: 'guest_user',
+            input_type: 'screenshot',
+            intent: 'placement_notice',
+            summary: 'TCS NQT hiring notification for engineering students. Min eligibility: 6.0 CGPA, no active backlogs.',
+            raw_extracted: {},
+            created_at: new Date(Date.now() - 3 * 3600 * 1000).toISOString()
+          }
+        ];
+
+        localStorage.setItem('lifeos_guest_tasks', JSON.stringify(mockTasks));
+        localStorage.setItem('lifeos_guest_events', JSON.stringify(mockEvents));
+        localStorage.setItem('lifeos_guest_reminders', JSON.stringify(mockReminders));
+        localStorage.setItem('lifeos_guest_intakes', JSON.stringify(mockIntakes));
+
+        setLocalTasks(mockTasks);
+        setLocalEvents(mockEvents);
+        setLocalReminders(mockReminders);
+        setLocalIntakes(mockIntakes);
+      }
+    } else {
+      localStorage.setItem('lifeos_guest', 'false');
+    }
+  }, [profile.id]);
+
+  const handleToggleTask = (taskId: string) => {
+    setLocalTasks((prev) => {
+      const next = prev.map((t) =>
+        t.id === taskId
+          ? ({ ...t, status: t.status === 'pending' ? 'done' : 'pending' } as Task)
+          : t
+      );
+      if (profile.id === 'guest_user') {
+        localStorage.setItem('lifeos_guest_tasks', JSON.stringify(next));
+      }
+      return next;
+    });
+  };
+
+  const isGuestMode = profile.id === 'guest_user';
+  const displayTasks = isClient ? localTasks : tasks;
+  const displayEvents = isClient ? localEvents : events;
+  const displayReminders = isClient ? localReminders : reminders;
+  const displayIntakes = isClient ? localIntakes : intakes;
+
+  const pendingTasks = displayTasks.filter((t) => t.status === 'pending');
   const highPriorityCount = pendingTasks.filter((t) => t.priority === 1).length;
-  const upcomingEvents  = events.filter((e) => !isPast(parseISO(e.start_time)));
-  const completedTasks  = tasks.filter((t) => t.status === 'done').length;
-  const completionRate  = tasks.length > 0 ? Math.round((completedTasks / tasks.length) * 100) : 0;
+  const upcomingEvents = displayEvents.filter((e) => !isPast(parseISO(e.start_time)));
+  const completedTasks = displayTasks.filter((t) => t.status === 'done').length;
+  const completionRate = displayTasks.length > 0 ? Math.round((completedTasks / displayTasks.length) * 100) : 0;
 
   const firstName = profile.name.split(' ')[0];
 
@@ -181,14 +337,23 @@ export default function DashboardClient({ profile, tasks, events, reminders, int
 
           <div className="flex items-center gap-3">
             <Link
-              href="/upload"
+              href={isGuestMode ? "/upload?guest=true" : "/upload"}
               id="dashboard-upload-btn"
               className="group flex items-center gap-2 bg-brand-500 hover:bg-brand-600 text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition-all hover:shadow-brand hover:scale-105 active:scale-95"
             >
               <Plus className="w-4 h-4 group-hover:rotate-90 transition-transform duration-200" />
               <span>Capture</span>
             </Link>
-            <UserButton afterSignOutUrl="/" />
+            {isGuestMode ? (
+              <Link
+                href="/sign-in"
+                className="text-xs border border-white/10 hover:border-brand-500/35 hover:bg-brand-500/5 px-4 py-2.5 rounded-xl text-white/70 hover:text-white transition-all font-semibold"
+              >
+                Sign In
+              </Link>
+            ) : (
+              <UserButton afterSignOutUrl="/" />
+            )}
           </div>
         </div>
       </header>
@@ -271,7 +436,7 @@ export default function DashboardClient({ profile, tasks, events, reminders, int
         </div>
 
         {/* ── Empty state ── */}
-        {intakes.length === 0 && (
+        {displayIntakes.length === 0 && (
           <div className="text-center py-16 animate-fade-in">
             <div className="relative w-24 h-24 mx-auto mb-6">
               <div className="absolute inset-0 rounded-3xl bg-brand-500/10 animate-pulse" />
@@ -284,7 +449,7 @@ export default function DashboardClient({ profile, tasks, events, reminders, int
               Upload a screenshot, placement notice, or PDF and let 5 AI agents go to work instantly.
             </p>
             <Link
-              href="/upload"
+              href={isGuestMode ? "/upload?guest=true" : "/upload"}
               id="empty-upload-btn"
               className="inline-flex items-center gap-2.5 bg-brand-500 hover:bg-brand-600 text-white px-7 py-3.5 rounded-2xl font-semibold transition-all hover:shadow-brand hover:scale-105 active:scale-95"
             >
@@ -294,7 +459,7 @@ export default function DashboardClient({ profile, tasks, events, reminders, int
           </div>
         )}
 
-        {intakes.length > 0 && (
+        {displayIntakes.length > 0 && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
             {/* ── Left column (2/3) ── */}
@@ -302,9 +467,9 @@ export default function DashboardClient({ profile, tasks, events, reminders, int
 
               {/* Recent captures */}
               <section>
-                <SectionHeader title="Recent Captures" count={intakes.length} href="/upload" hrefLabel="+ New" />
+                <SectionHeader title="Recent Captures" count={displayIntakes.length} href={isGuestMode ? "/upload?guest=true" : "/upload"} hrefLabel="+ New" />
                 <div className="space-y-2.5">
-                  {intakes.map((intake, i) => {
+                  {displayIntakes.map((intake, i) => {
                     const cfg = INTENT_CONFIG[intake.intent] ?? INTENT_CONFIG.general;
                     return (
                       <div
@@ -347,8 +512,14 @@ export default function DashboardClient({ profile, tasks, events, reminders, int
                           }`}
                           style={{ animationDelay: `${i * 40}ms` }}
                         >
-                          {/* Priority dot */}
-                          <div className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${cfg.dot} ${cfg.glow}`} />
+                          {/* Checkbox button instead of static dot */}
+                          <button
+                            onClick={() => handleToggleTask(task.id)}
+                            className="mt-1 flex-shrink-0 w-[18px] h-[18px] rounded bg-surface border border-white/20 hover:border-brand-500 hover:bg-brand-500/10 flex items-center justify-center transition-all group/checkbox active:scale-90"
+                            title="Mark task completed"
+                          >
+                            <span className="w-1.5 h-1.5 rounded-sm bg-brand-500 opacity-0 group-hover/checkbox:opacity-50 transition-opacity" />
+                          </button>
 
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-medium text-white leading-snug">{task.title}</p>

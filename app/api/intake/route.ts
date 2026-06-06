@@ -10,25 +10,46 @@ import type { Profile } from '@/lib/supabase';
 
 export async function POST(req: NextRequest) {
   try {
-    const { userId } = await auth();
-    if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const isGuest = req.headers.get('x-guest-mode') === 'true';
+    let userId = '';
+    let profile: Profile | null = null;
+    let supabase;
 
-    const supabase = createServerSupabaseClient();
+    if (isGuest) {
+      userId = 'guest_user';
+      profile = {
+        id: 'guest_user',
+        name: 'Guest Student',
+        email: 'guest@lifeos.ai',
+        cgpa: 9.2,
+        branch: 'CSE',
+        skills: ['React', 'TypeScript', 'Python'],
+        year: 3,
+        college: 'iQOO Institute of Tech',
+        created_at: new Date().toISOString()
+      };
+    } else {
+      const authResult = await auth();
+      if (!authResult.userId) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      }
+      userId = authResult.userId;
+      supabase = createServerSupabaseClient();
 
-    // Fetch student profile
-    const { data: profile, error: profileError } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .single();
+      // Fetch student profile
+      const { data: dbProfile, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
 
-    if (profileError || !profile) {
-      return NextResponse.json(
-        { error: 'Profile not found. Please complete your profile first.' },
-        { status: 404 }
-      );
+      if (profileError || !dbProfile) {
+        return NextResponse.json(
+          { error: 'Profile not found. Please complete your profile first.' },
+          { status: 404 }
+        );
+      }
+      profile = dbProfile;
     }
 
     // Parse request — supports JSON (base64 image) or FormData (file upload)
@@ -102,62 +123,66 @@ export async function POST(req: NextRequest) {
     const placement = placementResult.status === 'fulfilled' ? placementResult.value : null;
     const reminders = reminderResult.status === 'fulfilled' ? reminderResult.value : null;
 
-    // Step 3: Save to Supabase
-    const { data: intake } = await supabase
-      .from('intakes')
-      .insert({
-        user_id: userId,
-        input_type: inputType,
-        raw_extracted: orchestratorOutput.extracted,
-        intent: orchestratorOutput.intent,
-        summary: orchestratorOutput.summary,
-      })
-      .select()
-      .single();
+    // Step 3: Save to Supabase (only for authenticated users)
+    let intakeId = 'guest_intake_' + Date.now();
 
-    const intakeId = intake?.id;
-
-    // Save tasks
-    if (tasks?.tasks?.length) {
-      await supabase.from('tasks').insert(
-        tasks.tasks.map((t) => ({
+    if (!isGuest && supabase) {
+      const { data: intake } = await supabase
+        .from('intakes')
+        .insert({
           user_id: userId,
-          intake_id: intakeId,
-          title: t.title,
-          description: t.description,
-          priority: t.priority,
-          due_date: t.due_date,
-          status: 'pending',
-          agent_source: t.agent_source,
-        }))
-      );
-    }
+          input_type: inputType,
+          raw_extracted: orchestratorOutput.extracted,
+          intent: orchestratorOutput.intent,
+          summary: orchestratorOutput.summary,
+        })
+        .select()
+        .single();
 
-    // Save calendar events
-    if (schedule?.events?.length) {
-      await supabase.from('events').insert(
-        schedule.events.map((e) => ({
-          user_id: userId,
-          intake_id: intakeId,
-          title: e.title,
-          start_time: e.start_time,
-          end_time: e.end_time,
-          event_type: e.event_type,
-          description: e.description,
-        }))
-      );
-    }
+      if (intake) intakeId = intake.id;
 
-    // Save reminders
-    if (reminders?.reminders?.length) {
-      await supabase.from('reminders').insert(
-        reminders.reminders.map((r) => ({
-          user_id: userId,
-          message: r.message,
-          remind_at: r.remind_at,
-          sent: false,
-        }))
-      );
+      // Save tasks
+      if (tasks?.tasks?.length) {
+        await supabase.from('tasks').insert(
+          tasks.tasks.map((t) => ({
+            user_id: userId,
+            intake_id: intakeId,
+            title: t.title,
+            description: t.description,
+            priority: t.priority,
+            due_date: t.due_date,
+            status: 'pending',
+            agent_source: t.agent_source,
+          }))
+        );
+      }
+
+      // Save calendar events
+      if (schedule?.events?.length) {
+        await supabase.from('events').insert(
+          schedule.events.map((e) => ({
+            user_id: userId,
+            intake_id: intakeId,
+            title: e.title,
+            start_time: e.start_time,
+            end_time: e.end_time,
+            event_type: e.event_type,
+            description: e.description,
+          }))
+        );
+      }
+
+      // Save reminders
+      if (reminders?.reminders?.length) {
+        await supabase.from('reminders').insert(
+          reminders.reminders.map((r) => ({
+            user_id: userId,
+            message: r.message,
+            remind_at: r.remind_at,
+            sent: false,
+          }))
+        );
+      }
     }
 
     return NextResponse.json({
