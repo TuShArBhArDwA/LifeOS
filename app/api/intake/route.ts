@@ -113,19 +113,19 @@ export async function POST(req: NextRequest) {
       agentsToRun.includes('schedule')
         ? runScheduleAgent(profile as Profile, orchestratorOutput)
         : Promise.resolve(null),
-      agentsToRun.includes('placement') && orchestratorOutput.intent === 'placement_notice'
+      agentsToRun.includes('placement')
         ? runPlacementAgent(profile as Profile, orchestratorOutput)
         : Promise.resolve(null),
       agentsToRun.includes('reminder')
         ? runReminderAgent(profile as Profile, orchestratorOutput)
         : Promise.resolve(null),
-      agentsToRun.includes('expense') && orchestratorOutput.intent === 'expense_receipt'
+      agentsToRun.includes('expense')
         ? runExpenseAgent(profile as Profile, imageBase64, mimeType, textInput)
         : Promise.resolve(null),
-      agentsToRun.includes('study') && orchestratorOutput.intent === 'study_notes'
+      agentsToRun.includes('study')
         ? runStudyAgent(profile as Profile, imageBase64, mimeType, textInput)
         : Promise.resolve(null),
-      agentsToRun.includes('content') && orchestratorOutput.intent === 'content_request' && textInput
+      agentsToRun.includes('content') && textInput
         ? runContentAgent(profile as Profile, textInput)
         : Promise.resolve(null),
     ]);

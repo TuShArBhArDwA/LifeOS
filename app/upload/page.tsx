@@ -290,6 +290,19 @@ export default function UploadPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                 {[
                   {
+                    id: 'example-all',
+                    icon: Sparkles,
+                    label: '🏆 Multi-Agent Mega Demo',
+                    sub: 'TCS Placement notice, study tips, leave letter, and food bills',
+                    color: 'text-yellow-400 font-bold',
+                    bg: 'hover:border-yellow-500/40 hover:bg-yellow-500/10 border-yellow-500/20 bg-yellow-500/5',
+                    text: `ALERT: TCS NQT campus placement notice received! Registration deadline: June 9, 2026. Venue: Auditorium B at 10:00 AM. Eligibility requirements: Minimum 6.5 CGPA, no active backlogs. Documents needed: Resume draft, Marks card.
+
+Let's also summarize the required placement study topics: "Aptitude consists of Quantitative reasoning, logical puzzles, and verbal sections. DBMS study requires understanding SQL Joins, Indexing, Normalization (1NF to BCNF), and ACID properties."
+
+Lastly, spent ₹120 for HOD signatures travel auto fare and Xerox printouts. Draft a request letter to the HOD for NOC certificate to attend the campus drive on June 12.`,
+                  },
+                  {
                     id: 'example-tcs',
                     icon: Briefcase,
                     label: 'Placement notice',

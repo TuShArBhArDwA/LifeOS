@@ -71,6 +71,7 @@ Return ONLY valid JSON matching this exact schema:
 }
 
 Rules:
+- If the text requests a full demo, contains multiple intents combined, or specifically mentions 'Multi-Agent', return intent 'general' and invoke ALL agents: ["task", "schedule", "placement", "reminder", "expense", "study", "content"]
 - Always include all agents for placement_notice: ["task", "schedule", "placement", "reminder"]
 - For assignment/exam, include: ["task", "schedule", "reminder"]
 - For general, include: ["task", "reminder"]
