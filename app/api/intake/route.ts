@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
     let imageBase64: string | undefined;
     let mimeType: string | undefined;
     let textInput: string | undefined;
-    let inputType: 'screenshot' | 'pdf' | 'text' = 'text';
+    let inputType: 'screenshot' | 'pdf' | 'text' | 'voice' = 'text';
 
     const contentType = req.headers.get('content-type') ?? '';
 

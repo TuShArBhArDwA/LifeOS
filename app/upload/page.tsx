@@ -1,12 +1,15 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import UploadZone from '@/components/UploadZone';
 import AgentThinking from '@/components/AgentThinking';
 import { TasksCard, EventsCard, PlacementCard, RemindersCard } from '@/components/ActionCards';
-import { AlertCircle, Sparkles, Briefcase, BookOpen, Calendar } from 'lucide-react';
+import {
+  AlertCircle, Sparkles, Briefcase, BookOpen,
+  Calendar, ArrowLeft, Plus, CheckCircle2,
+  ChevronRight, Zap, Target
+} from 'lucide-react';
 import type { GeneratedTask } from '@/lib/agents/task-agent';
 import type { GeneratedEvent } from '@/lib/agents/schedule-agent';
 import type { PlacementAgentOutput } from '@/lib/agents/placement-agent';
@@ -22,8 +25,16 @@ type IntakeResult = {
   reminders: GeneratedReminder[];
 };
 
+const INTENT_LABELS: Record<string, { label: string; color: string; bg: string }> = {
+  placement_notice: { label: 'Placement',  color: 'text-emerald-400', bg: 'bg-emerald-500/12 border-emerald-500/25' },
+  assignment:       { label: 'Assignment', color: 'text-brand-400',   bg: 'bg-brand-500/12 border-brand-500/25' },
+  exam:             { label: 'Exam',       color: 'text-red-400',     bg: 'bg-red-500/12 border-red-500/25' },
+  timetable:        { label: 'Timetable',  color: 'text-yellow-400',  bg: 'bg-yellow-500/12 border-yellow-500/25' },
+  fee_notice:       { label: 'Fee Notice', color: 'text-orange-400',  bg: 'bg-orange-500/12 border-orange-500/25' },
+  general:          { label: 'General',    color: 'text-white/50',    bg: 'bg-white/5 border-white/10' },
+};
+
 export default function UploadPage() {
-  const router = useRouter();
   const [state, setState] = useState<ProcessingState>('idle');
   const [result, setResult] = useState<IntakeResult | null>(null);
   const [error, setError] = useState<string>('');
@@ -41,7 +52,6 @@ export default function UploadPage() {
         const fd = new FormData();
         fd.append('file', file);
         body = fd;
-        // Don't set Content-Type — browser sets multipart boundary automatically
       } else if (text) {
         body = JSON.stringify({ text, inputType: 'text' });
         contentType = 'application/json';
@@ -80,61 +90,94 @@ export default function UploadPage() {
 
   return (
     <div className="min-h-screen bg-surface">
-      {/* Header */}
-      <header className="sticky top-0 z-20 glass-strong border-b border-surface-border safe-top">
-        <div className="flex items-center justify-between px-5 py-4 max-w-2xl mx-auto">
+
+      {/* Background orb */}
+      <div className="fixed top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-brand-500/6 blur-[100px] rounded-full pointer-events-none z-0" />
+      <div className="fixed inset-0 pointer-events-none z-0 opacity-[0.02]"
+        style={{ backgroundImage: 'linear-gradient(#3b82f6 1px,transparent 1px),linear-gradient(90deg,#3b82f6 1px,transparent 1px)', backgroundSize: '50px 50px' }} />
+
+      {/* ── Header ── */}
+      <header className="sticky top-0 z-20 border-b border-surface-border/50 backdrop-blur-xl bg-surface/80">
+        <div className="flex items-center justify-between px-6 py-4 max-w-3xl mx-auto">
           <div className="flex items-center gap-3">
-            <Link href="/dashboard" id="upload-back-btn" className="w-9 h-9 rounded-xl bg-surface-elevated flex items-center justify-center text-white/60 hover:text-white transition-colors">
-              ←
+            <Link
+              href="/dashboard"
+              id="upload-back-btn"
+              className="w-9 h-9 rounded-xl bg-surface-elevated border border-surface-border flex items-center justify-center text-white/50 hover:text-white hover:border-white/20 transition-all"
+            >
+              <ArrowLeft className="w-4 h-4" />
             </Link>
             <div>
-              <h1 className="font-bold text-sm">Upload to LifeOS</h1>
-              <p className="text-xs text-white/40">Screenshot, PDF, or paste text</p>
+              <h1 className="font-semibold text-sm text-white">
+                {state === 'done' ? 'Results' : 'Capture'}
+              </h1>
+              <p className="text-xs text-white/30">
+                {state === 'done' ? 'AI agents have finished processing' : 'Screenshot, PDF, text, or voice'}
+              </p>
             </div>
           </div>
+
           {state === 'done' && (
             <button
               id="upload-new-btn"
               onClick={handleReset}
-              className="text-xs text-brand-400 hover:text-brand-300 transition-colors font-medium px-3 py-1.5 rounded-xl bg-brand-500/10"
+              className="flex items-center gap-1.5 text-xs text-brand-400 hover:text-brand-300 transition-colors font-semibold px-3.5 py-2 rounded-xl bg-brand-500/10 hover:bg-brand-500/15"
             >
-              + New Upload
+              <Plus className="w-3.5 h-3.5" />
+              New upload
             </button>
           )}
         </div>
       </header>
 
-      <main className="max-w-2xl mx-auto px-5 py-6 pb-24">
-        {/* IDLE — show upload zone */}
+      <main className="relative z-10 max-w-3xl mx-auto px-6 py-8 pb-24">
+
+        {/* ── IDLE ── */}
         {state === 'idle' && (
-          <div className="space-y-6 animate-fade-in">
-            <div className="text-center py-2">
-              <h2 className="text-xl font-bold text-white">Drop anything.</h2>
-              <p className="text-white/40 text-sm mt-1">LifeOS handles the rest.</p>
+          <div className="space-y-8 animate-fade-in">
+            <div className="text-center">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold text-brand-300 border border-brand-500/20 bg-brand-500/8 mb-5">
+                <Zap className="w-3.5 h-3.5" />
+                5 AI agents ready
+              </div>
+              <h2 className="text-2xl font-bold text-white mb-2">Drop anything.</h2>
+              <p className="text-white/40 text-sm">LifeOS reads it and handles everything else.</p>
             </div>
+
             <UploadZone onUpload={handleUpload} loading={false} />
 
-            {/* Example inputs */}
+            {/* Examples */}
             <div>
-              <p className="text-xs text-white/30 uppercase tracking-wider mb-3 text-center">Try an example</p>
-              <div className="grid grid-cols-1 gap-2">
+              <p className="text-[10px] text-white/25 uppercase tracking-widest font-semibold mb-3 text-center">
+                Try an example
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                 {[
                   {
                     id: 'example-tcs',
-                    icon: <Briefcase className="w-4 h-4 text-brand-400" />,
+                    icon: Briefcase,
                     label: 'Placement notice',
+                    sub: 'TCS NQT Drive',
+                    color: 'text-emerald-400',
+                    bg: 'hover:border-emerald-500/30 hover:bg-emerald-500/5',
                     text: 'TCS NQT Drive — Register by June 7, 2026. Eligibility: 60% aggregate, No active backlogs. Required documents: Updated resume, College ID, 10th & 12th marksheets. Venue: Auditorium A. Reporting time: 9:00 AM.',
                   },
                   {
                     id: 'example-assignment',
-                    icon: <BookOpen className="w-4 h-4 text-brand-400" />,
+                    icon: BookOpen,
                     label: 'Assignment deadline',
+                    sub: 'DBMS Mini Project',
+                    color: 'text-brand-400',
+                    bg: 'hover:border-brand-500/30 hover:bg-brand-500/5',
                     text: 'DBMS Mini Project submission is due this Friday. You need to submit a working prototype + 5-page report to the college portal. Late submissions will not be accepted.',
                   },
                   {
                     id: 'example-exam',
-                    icon: <Calendar className="w-4 h-4 text-brand-400" />,
+                    icon: Calendar,
                     label: 'Exam schedule',
+                    sub: 'End semester exams',
+                    color: 'text-red-400',
+                    bg: 'hover:border-red-500/30 hover:bg-red-500/5',
                     text: 'End Semester Exams start June 15, 2026. Data Structures: June 15, Operating Systems: June 18, Computer Networks: June 20, DBMS: June 22. Exam time: 10 AM - 1 PM.',
                   },
                 ].map((ex) => (
@@ -142,10 +185,16 @@ export default function UploadPage() {
                     key={ex.id}
                     id={ex.id}
                     onClick={() => handleUpload(null, ex.text)}
-                    className="w-full text-left px-4 py-3 glass border border-surface-border rounded-2xl text-sm text-white/60 hover:text-white hover:border-brand-500/30 transition-all flex items-center gap-2.5"
+                    className={`group text-left px-4 py-4 glass border border-surface-border rounded-2xl transition-all ${ex.bg} hover:-translate-y-0.5`}
                   >
-                    {ex.icon}
-                    <span>{ex.label}</span>
+                    <div className="flex items-center gap-2.5 mb-2">
+                      <ex.icon className={`w-4 h-4 ${ex.color}`} />
+                      <span className="text-xs font-semibold text-white/70 group-hover:text-white transition-colors">{ex.label}</span>
+                    </div>
+                    <p className="text-[11px] text-white/30">{ex.sub}</p>
+                    <div className="flex items-center gap-1 mt-2 text-[10px] text-white/20 group-hover:text-white/40 transition-colors font-medium">
+                      Try this <ChevronRight className="w-3 h-3" />
+                    </div>
                   </button>
                 ))}
               </div>
@@ -153,49 +202,106 @@ export default function UploadPage() {
           </div>
         )}
 
-        {/* PROCESSING — agent thinking animation */}
+        {/* ── PROCESSING ── */}
         {state === 'processing' && (
           <div className="animate-fade-in">
             <AgentThinking />
           </div>
         )}
 
-        {/* ERROR */}
+        {/* ── ERROR ── */}
         {state === 'error' && (
-          <div className="text-center py-12 animate-fade-in flex flex-col items-center justify-center">
-            <AlertCircle className="w-12 h-12 text-red-500 mb-4" />
-            <h3 className="font-semibold text-white mb-2">Something went wrong</h3>
-            <p className="text-sm text-white/40 mb-6">{error}</p>
+          <div className="text-center py-16 animate-fade-in flex flex-col items-center">
+            <div className="w-16 h-16 rounded-3xl bg-red-500/10 border border-red-500/20 flex items-center justify-center mx-auto mb-5">
+              <AlertCircle className="w-8 h-8 text-red-400" />
+            </div>
+            <h3 className="font-bold text-white text-lg mb-2">Something went wrong</h3>
+            <p className="text-sm text-white/40 mb-8 max-w-sm mx-auto leading-relaxed">{error}</p>
             <button
               id="error-retry-btn"
               onClick={handleReset}
-              className="px-6 py-3 bg-brand-500 text-white rounded-2xl font-medium hover:bg-brand-600 transition-colors"
+              className="px-7 py-3.5 bg-brand-500 hover:bg-brand-600 text-white rounded-2xl font-semibold transition-all hover:shadow-brand hover:scale-105 active:scale-95"
             >
               Try again
             </button>
           </div>
         )}
 
-        {/* DONE — show action cards */}
+        {/* ── DONE ── */}
         {state === 'done' && result && (
-          <div className="space-y-4 animate-fade-in">
-            {/* Summary banner */}
-            <div className="glass-strong border border-brand-500/20 rounded-3xl p-5">
-              <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-gradient-brand flex items-center justify-center flex-shrink-0">
-                  <Sparkles className="w-5 h-5 text-white" />
-                </div>
-                <div>
-                  <p className="text-xs text-brand-400 font-semibold uppercase tracking-wider mb-1">LifeOS Summary</p>
-                  <p className="text-white font-medium text-sm leading-relaxed">{result.orchestrator.summary}</p>
-                  <div className="flex items-center gap-2 mt-2">
-                    <span className="text-[10px] bg-surface-elevated px-2 py-0.5 rounded-full text-white/40 capitalize">
-                      {result.orchestrator.intent.replace('_', ' ')}
-                    </span>
-                    <span className="text-[10px] text-white/30">
-                      {Math.round(result.orchestrator.confidence * 100)}% confidence
-                    </span>
+          <div className="space-y-5 animate-fade-in">
+
+            {/* Summary hero card */}
+            <div className="relative rounded-3xl overflow-hidden">
+              {/* Gradient border */}
+              <div className="absolute inset-0 rounded-3xl p-px bg-gradient-to-br from-brand-500/50 via-transparent to-accent-green/30">
+                <div className="w-full h-full rounded-3xl bg-surface-card" />
+              </div>
+              <div className="absolute top-0 right-0 w-48 h-24 bg-brand-500/10 blur-3xl rounded-full" />
+
+              <div className="relative p-6">
+                {/* Top row */}
+                <div className="flex items-start justify-between gap-4 mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-brand-500 to-brand-600 flex items-center justify-center flex-shrink-0">
+                      <Sparkles className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold text-brand-400 uppercase tracking-widest">LifeOS Summary</p>
+                      <p className="text-xs text-white/35 mt-0.5">
+                        {Math.round(result.orchestrator.confidence * 100)}% confidence
+                      </p>
+                    </div>
                   </div>
+                  {(() => {
+                    const cfg = INTENT_LABELS[result.orchestrator.intent] ?? INTENT_LABELS.general;
+                    return (
+                      <span className={`text-[11px] font-bold px-3 py-1 rounded-full border ${cfg.bg} ${cfg.color} flex-shrink-0`}>
+                        {cfg.label}
+                      </span>
+                    );
+                  })()}
+                </div>
+
+                <p className="text-white/85 font-medium leading-relaxed mb-5">
+                  {result.orchestrator.summary}
+                </p>
+
+                {/* Stat chips */}
+                <div className="flex flex-wrap gap-2">
+                  {result.tasks.length > 0 && (
+                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-brand-500/10 border border-brand-500/20">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-brand-400" />
+                      <span className="text-xs font-semibold text-brand-400">{result.tasks.length} tasks</span>
+                    </div>
+                  )}
+                  {result.events.length > 0 && (
+                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+                      <Calendar className="w-3.5 h-3.5 text-emerald-400" />
+                      <span className="text-xs font-semibold text-emerald-400">{result.events.length} events</span>
+                    </div>
+                  )}
+                  {result.reminders.length > 0 && (
+                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-accent-purple/10 border border-accent-purple/20">
+                      <Target className="w-3.5 h-3.5 text-accent-purple" />
+                      <span className="text-xs font-semibold text-accent-purple">{result.reminders.length} reminders</span>
+                    </div>
+                  )}
+                  {result.placement && (
+                    <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border ${
+                      result.placement.eligibility.eligible
+                        ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
+                        : 'bg-red-500/10 border-red-500/20 text-red-400'
+                    }`}>
+                      {result.placement.eligibility.eligible
+                        ? <CheckCircle2 className="w-3.5 h-3.5" />
+                        : <AlertCircle className="w-3.5 h-3.5" />
+                      }
+                      <span className="text-xs font-semibold">
+                        {result.placement.eligibility.eligible ? 'Eligible' : 'Not eligible'}
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -206,21 +312,23 @@ export default function UploadPage() {
             {result.placement && <PlacementCard placement={result.placement} />}
             <RemindersCard reminders={result.reminders} />
 
-            {/* Navigation */}
-            <div className="pt-4 flex gap-3">
+            {/* Bottom nav */}
+            <div className="flex gap-3 pt-2">
               <button
                 id="done-new-upload-btn"
                 onClick={handleReset}
-                className="flex-1 py-4 glass border border-surface-border rounded-2xl text-white/60 hover:text-white font-medium text-sm transition-all"
+                className="flex-1 flex items-center justify-center gap-2 py-4 glass border border-surface-border rounded-2xl text-white/50 hover:text-white font-medium text-sm transition-all hover:border-white/15"
               >
-                + New upload
+                <Plus className="w-4 h-4" />
+                New upload
               </button>
               <Link
                 href="/dashboard"
                 id="done-dashboard-btn"
-                className="flex-1 py-4 bg-brand-500 hover:bg-brand-600 text-white rounded-2xl font-semibold text-sm text-center transition-all"
+                className="flex-1 flex items-center justify-center gap-2 py-4 bg-brand-500 hover:bg-brand-600 text-white rounded-2xl font-semibold text-sm text-center transition-all hover:shadow-brand hover:scale-[1.02] active:scale-95"
               >
-                View Dashboard →
+                View Dashboard
+                <ChevronRight className="w-4 h-4" />
               </Link>
             </div>
           </div>
