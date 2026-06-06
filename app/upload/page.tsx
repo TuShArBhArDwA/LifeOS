@@ -504,9 +504,8 @@ export default function UploadPage() {
                 {/* Top row */}
                 <div className="flex items-start justify-between gap-4 mb-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-[0_0_20px_rgba(59,130,246,0.3)]"
-                      style={{ background: 'linear-gradient(135deg, #3b82f6, #2563eb)' }}>
-                      <Sparkles className="w-5 h-5 text-white" />
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 shadow-[0_0_20px_rgba(59,130,246,0.3)] bg-surface-card border border-white/8 p-1.5">
+                      <img src="/favicon.png" alt="LifeOS Logo" className="w-full h-full object-contain rounded-full" />
                     </div>
                     <div>
                       <p className="text-[10px] font-black text-brand-400 uppercase tracking-widest">LifeOS Analysis</p>
