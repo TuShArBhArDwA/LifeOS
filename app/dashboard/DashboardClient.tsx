@@ -155,128 +155,18 @@ export default function DashboardClient({ profile, tasks, events, reminders, int
   useEffect(() => {
     setIsClient(true);
     if (profile.id === 'guest_user') {
-      // Mark guest mode locally so upload page can read it too
+      // Always start fresh — clear any old guest data on every visit
+      localStorage.removeItem('lifeos_guest_tasks');
+      localStorage.removeItem('lifeos_guest_events');
+      localStorage.removeItem('lifeos_guest_reminders');
+      localStorage.removeItem('lifeos_guest_intakes');
       localStorage.setItem('lifeos_guest', 'true');
 
-      const storedTasks = localStorage.getItem('lifeos_guest_tasks');
-      const storedEvents = localStorage.getItem('lifeos_guest_events');
-      const storedReminders = localStorage.getItem('lifeos_guest_reminders');
-      const storedIntakes = localStorage.getItem('lifeos_guest_intakes');
-
-      if (storedTasks && storedEvents && storedReminders && storedIntakes) {
-        setLocalTasks(JSON.parse(storedTasks));
-        setLocalEvents(JSON.parse(storedEvents));
-        setLocalReminders(JSON.parse(storedReminders));
-        setLocalIntakes(JSON.parse(storedIntakes));
-      } else {
-        // Pre-populate with beautiful premium mock data for the demo
-        const mockTasks: Task[] = [
-          {
-            id: 'task_1',
-            user_id: 'guest_user',
-            title: 'Complete TCS NQT Aptitude Mock Test',
-            description: 'Practice the quantitative and logical reasoning mock test on PrepInsta for TCS NQT prep.',
-            priority: 1,
-            due_date: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-            status: 'pending',
-            agent_source: 'task_agent',
-            created_at: new Date().toISOString()
-          },
-          {
-            id: 'task_2',
-            user_id: 'guest_user',
-            title: 'Refactor Resume with React project details',
-            description: 'Add the recent Next.js/Tailwind portfolio project under projects section.',
-            priority: 2,
-            due_date: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-            status: 'pending',
-            agent_source: 'task_agent',
-            created_at: new Date().toISOString()
-          },
-          {
-            id: 'task_3',
-            user_id: 'guest_user',
-            title: 'Submit Operating Systems Assignment',
-            description: 'Draft the answers for Process Synchronization and CPU Scheduling theory questions.',
-            priority: 2,
-            due_date: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-            status: 'pending',
-            agent_source: 'task_agent',
-            created_at: new Date().toISOString()
-          }
-        ];
-
-        const mockEvents: CalendarEvent[] = [
-          {
-            id: 'event_1',
-            user_id: 'guest_user',
-            title: 'TCS NQT Registration Deadline',
-            start_time: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] + 'T23:59:00',
-            event_type: 'deadline',
-            description: 'Registration closes on the NextStep portal.',
-            created_at: new Date().toISOString()
-          },
-          {
-            id: 'event_2',
-            user_id: 'guest_user',
-            title: 'Study: CPU Scheduling Algorithms',
-            start_time: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] + 'T19:00:00',
-            end_time: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] + 'T21:00:00',
-            event_type: 'study_block',
-            description: '2-hour focused study block.',
-            created_at: new Date().toISOString()
-          },
-          {
-            id: 'event_3',
-            user_id: 'guest_user',
-            title: 'TCS Placement Prep Webinar',
-            start_time: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] + 'T14:00:00',
-            end_time: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] + 'T15:30:00',
-            event_type: 'interview',
-            description: 'Live interactive Q&A session with placement cell.',
-            created_at: new Date().toISOString()
-          }
-        ];
-
-        const mockReminders: Reminder[] = [
-          {
-            id: 'rem_1',
-            user_id: 'guest_user',
-            message: '🔥 TCS NQT Registration closes soon. Complete verification!',
-            remind_at: new Date(Date.now() + 12 * 60 * 60 * 1000).toISOString(),
-            sent: false
-          },
-          {
-            id: 'rem_2',
-            user_id: 'guest_user',
-            message: '💡 Tip: Highlight core DSA achievements in your resume',
-            remind_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
-            sent: false
-          }
-        ];
-
-        const mockIntakes: Intake[] = [
-          {
-            id: 'intake_1',
-            user_id: 'guest_user',
-            input_type: 'screenshot',
-            intent: 'placement_notice',
-            summary: 'TCS NQT hiring notification for engineering students. Min eligibility: 6.0 CGPA, no active backlogs.',
-            raw_extracted: {},
-            created_at: new Date(Date.now() - 3 * 3600 * 1000).toISOString()
-          }
-        ];
-
-        localStorage.setItem('lifeos_guest_tasks', JSON.stringify(mockTasks));
-        localStorage.setItem('lifeos_guest_events', JSON.stringify(mockEvents));
-        localStorage.setItem('lifeos_guest_reminders', JSON.stringify(mockReminders));
-        localStorage.setItem('lifeos_guest_intakes', JSON.stringify(mockIntakes));
-
-        setLocalTasks(mockTasks);
-        setLocalEvents(mockEvents);
-        setLocalReminders(mockReminders);
-        setLocalIntakes(mockIntakes);
-      }
+      // Start with completely empty state
+      setLocalTasks([]);
+      setLocalEvents([]);
+      setLocalReminders([]);
+      setLocalIntakes([]);
     } else {
       localStorage.setItem('lifeos_guest', 'false');
     }
