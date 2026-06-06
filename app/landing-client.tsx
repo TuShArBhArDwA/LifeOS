@@ -6,7 +6,7 @@ import { SignInButton, SignUpButton } from '@clerk/nextjs';
 import {
   Camera, Brain, Zap, CheckCircle2,
   Cpu, CheckSquare, Target, Calendar, Bell,
-  ArrowRight, Sparkles, ChevronDown
+  ArrowRight, Sparkles, ChevronDown, Receipt, FileEdit
 } from 'lucide-react';
 
 /* ─── Animated counter hook ─────────────────────────────────────── */
@@ -99,10 +99,13 @@ function Orb({ className }: { className: string }) {
 /* ─── Agent flow card ────────────────────────────────────────────── */
 const AGENTS = [
   { icon: Cpu,         label: 'Orchestrator',  color: 'text-brand-400',   bg: 'bg-brand-500/10',   delay: 0 },
-  { icon: CheckSquare, label: 'Task Agent',     color: 'text-accent-green',bg: 'bg-accent-green/10', delay: 150 },
-  { icon: Target,      label: 'Placement',      color: 'text-accent-purple',bg: 'bg-accent-purple/10',delay: 300 },
-  { icon: Calendar,    label: 'Schedule',       color: 'text-accent-yellow',bg: 'bg-accent-yellow/10',delay: 450 },
-  { icon: Bell,        label: 'Reminders',      color: 'text-accent-orange',bg: 'bg-accent-orange/10',delay: 600 },
+  { icon: CheckSquare, label: 'Task Agent',     color: 'text-accent-green',bg: 'bg-accent-green/10', delay: 100 },
+  { icon: Target,      label: 'Placement',      color: 'text-accent-purple',bg: 'bg-accent-purple/10',delay: 200 },
+  { icon: Calendar,    label: 'Schedule',       color: 'text-accent-yellow',bg: 'bg-accent-yellow/10',delay: 300 },
+  { icon: Bell,        label: 'Reminders',      color: 'text-accent-orange',bg: 'bg-accent-orange/10',delay: 400 },
+  { icon: Receipt,     label: 'Expense Agent',  color: 'text-pink-400',    bg: 'bg-pink-500/10',    delay: 500 },
+  { icon: Brain,       label: 'Study Agent',    color: 'text-violet-400',  bg: 'bg-violet-500/10',  delay: 600 },
+  { icon: FileEdit,    label: 'Content Agent',  color: 'text-cyan-400',    bg: 'bg-cyan-500/10',    delay: 700 },
 ];
 
 /* ─── Main component ─────────────────────────────────────────────── */
@@ -213,7 +216,7 @@ export default function LandingClient() {
           <div className="flex items-center justify-center gap-12 flex-wrap">
             {[
               { ref: c1.ref, display: `< ${c1.display}`, label: 'Processing time' },
-              { ref: undefined, display: '5', label: 'AI Agents' },
+              { ref: undefined, display: '7', label: 'AI Agents' },
               { ref: c3.ref, display: `${c3.display} clicks`, label: 'Manual effort' },
             ].map((stat, i) => (
               <div key={i} className="text-center" ref={stat.ref}>
@@ -238,7 +241,7 @@ export default function LandingClient() {
 
           <div className="relative">
             <p className="text-xs text-brand-400 font-mono font-semibold uppercase tracking-widest text-center mb-2">Live pipeline</p>
-            <h2 className="text-2xl md:text-3xl font-bold text-center mb-10">Five Specialized Agents, One Unified Brain</h2>
+            <h2 className="text-2xl md:text-3xl font-bold text-center mb-10">Seven Specialized Agents, One Unified Brain</h2>
 
             {/* Input → agents flow */}
             <div className="flex flex-col md:flex-row items-center gap-4 md:gap-0 justify-center">
@@ -317,7 +320,7 @@ export default function LandingClient() {
           {[
             { step: '01', Icon: Camera,       title: 'Capture',    desc: 'Screenshot, PDF, text, or voice recording' },
             { step: '02', Icon: Brain,         title: 'Understand', desc: 'AI extracts intent, entities, and deadlines' },
-            { step: '03', Icon: Zap,           title: 'Act',        desc: '5 agents collaborate in parallel instantly' },
+            { step: '03', Icon: Zap,           title: 'Act',        desc: '7 agents collaborate in parallel instantly' },
             { step: '04', Icon: CheckCircle2,  title: 'Done',       desc: 'Tasks, schedule, reminders — all ready' },
           ].map((item, i) => (
             <div

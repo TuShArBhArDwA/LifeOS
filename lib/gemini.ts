@@ -40,12 +40,7 @@ export async function geminiJSON<T>(prompt: string): Promise<T> {
   const userPrompt =
     splitIdx !== -1 ? prompt.slice(splitIdx + 2).trim() : prompt.trim();
 
-  try {
-    return await groqJSON<T>(systemPrompt, userPrompt);
-  } catch (groqError) {
-    console.warn('[geminiJSON] Groq failed, falling back to Gemini:', groqError);
-    return await geminiJSONDirect<T>(prompt);
-  }
+  return await groqJSON<T>(systemPrompt, userPrompt);
 }
 
 /** Direct Gemini call (fallback) with one auto-retry on 429 */

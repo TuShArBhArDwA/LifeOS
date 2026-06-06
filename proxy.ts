@@ -6,6 +6,7 @@ const isPublicRoute = createRouteMatcher([
   '/',
   '/dashboard(.*)',
   '/upload(.*)',
+  '/settings(.*)',
   '/api/intake(.*)',
 ]);
 

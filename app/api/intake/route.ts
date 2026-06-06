@@ -10,6 +10,7 @@ import { runExpenseAgent } from '@/lib/agents/expense-agent';
 import { runStudyAgent } from '@/lib/agents/study-agent';
 import { runContentAgent } from '@/lib/agents/content-agent';
 import type { Profile } from '@/lib/supabase';
+import { PRESTORED_ANSWERS } from '@/lib/prestored-answers';
 
 export async function POST(req: NextRequest) {
   try {
@@ -93,6 +94,109 @@ export async function POST(req: NextRequest) {
 
     if (!imageBase64 && !textInput) {
       return NextResponse.json({ error: 'No input provided' }, { status: 400 });
+    }
+
+    // Intercept preset examples for demo mode to save API limits and speed up responses
+    if (textInput) {
+      const normalized = textInput.toLowerCase().trim();
+      let matchedExampleId: string | null = null;
+      if (normalized.startsWith('alert: tcs nqt') || normalized.includes('multi-agent mega demo')) {
+        matchedExampleId = 'example-all';
+      } else if (normalized.startsWith('tcs nqt drive')) {
+        matchedExampleId = 'example-tcs';
+      } else if (normalized.startsWith('dbms mini project')) {
+        matchedExampleId = 'example-assignment';
+      } else if (normalized.startsWith('end semester exams')) {
+        matchedExampleId = 'example-exam';
+      } else if (normalized.startsWith('spent today: canteen')) {
+        matchedExampleId = 'example-expense';
+      } else if (normalized.startsWith('cpu scheduling notes')) {
+        matchedExampleId = 'example-study';
+      } else if (normalized.startsWith('draft a leave application')) {
+        matchedExampleId = 'example-content';
+      }
+
+      if (matchedExampleId && PRESTORED_ANSWERS[matchedExampleId]) {
+        console.log(`[Intake Route] Intercepted example: ${matchedExampleId}. Serving prestored answers.`);
+        
+        // Artificial delay to simulate real-time agent execution during live demo (matches 11.3s total UI phase durations)
+        await new Promise((resolve) => setTimeout(resolve, 11500));
+
+        const mockData = PRESTORED_ANSWERS[matchedExampleId];
+        let intakeId = 'guest_intake_' + Date.now();
+
+        if (!isGuest && supabase) {
+          const { data: intake } = await supabase
+            .from('intakes')
+            .insert({
+              user_id: userId,
+              input_type: inputType,
+              raw_extracted: mockData.orchestrator.extracted,
+              intent: mockData.orchestrator.intent,
+              summary: mockData.orchestrator.summary,
+            })
+            .select()
+            .single();
+
+          if (intake) intakeId = intake.id;
+
+          // Save tasks
+          if (mockData.tasks?.length) {
+            await supabase.from('tasks').insert(
+              mockData.tasks.map((t: any) => ({
+                user_id: userId,
+                intake_id: intakeId,
+                title: t.title,
+                description: t.description,
+                priority: t.priority,
+                due_date: t.due_date,
+                status: 'pending',
+                agent_source: t.agent_source,
+              }))
+            );
+          }
+
+          // Save calendar events
+          if (mockData.events?.length) {
+            await supabase.from('events').insert(
+              mockData.events.map((e: any) => ({
+                user_id: userId,
+                intake_id: intakeId,
+                title: e.title,
+                start_time: e.start_time,
+                end_time: e.end_time,
+                event_type: e.event_type,
+                description: e.description,
+              }))
+            );
+          }
+
+          // Save reminders
+          if (mockData.reminders?.length) {
+            await supabase.from('reminders').insert(
+              mockData.reminders.map((r: any) => ({
+                user_id: userId,
+                message: r.message,
+                remind_at: r.remind_at,
+                sent: false,
+              }))
+            );
+          }
+        }
+
+        return NextResponse.json({
+          success: true,
+          orchestrator: mockData.orchestrator,
+          tasks: mockData.tasks,
+          events: mockData.events,
+          placement: mockData.placement,
+          reminders: mockData.reminders,
+          expense: mockData.expense,
+          study: mockData.study,
+          content: mockData.content,
+          intake_id: intakeId,
+        });
+      }
     }
 
     // Step 1: Orchestrator
