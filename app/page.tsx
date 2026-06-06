@@ -16,7 +16,7 @@ export default async function LandingPage() {
       {/* Nav */}
       <nav className="relative z-10 flex items-center justify-between px-6 py-5 max-w-5xl mx-auto w-full">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-xl bg-gradient-brand flex items-center justify-center text-white font-bold text-sm">L</div>
+          <img src="/favicon.png" alt="LifeOS Logo" className="w-8 h-8 rounded-lg object-contain" />
           <span className="font-bold text-lg tracking-tight">LifeOS</span>
         </div>
         <div className="flex items-center gap-3">

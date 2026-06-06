@@ -56,7 +56,7 @@ export default function OnboardingPage() {
       <div className="relative z-10 w-full max-w-lg">
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-brand flex items-center justify-center text-white font-bold text-xl mx-auto mb-4">L</div>
+          <img src="/favicon.png" alt="LifeOS Logo" className="w-12 h-12 rounded-xl object-contain mx-auto mb-4" />
           <h1 className="text-2xl font-bold mb-2">Set up your profile</h1>
           <p className="text-white/50 text-sm">LifeOS uses this to check eligibility and personalize your experience</p>
         </div>

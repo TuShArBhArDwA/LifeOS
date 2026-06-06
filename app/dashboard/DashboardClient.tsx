@@ -78,7 +78,7 @@ export default function DashboardClient({ profile, tasks, events, reminders, int
       <header className="sticky top-0 z-20 glass-strong border-b border-surface-border safe-top">
         <div className="flex items-center justify-between px-5 py-4 max-w-2xl mx-auto">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-xl bg-gradient-brand flex items-center justify-center text-white font-bold text-sm">L</div>
+            <img src="/favicon.png" alt="LifeOS Logo" className="w-8 h-8 rounded-lg object-contain" />
             <span className="font-bold text-sm">LifeOS</span>
           </div>
           <div className="flex items-center gap-3">

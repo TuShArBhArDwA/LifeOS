@@ -8,8 +8,8 @@ export const metadata: Metadata = {
     'Upload a screenshot, notice, or PDF. LifeOS extracts deadlines, checks eligibility, creates tasks, calendar events, and study plans — automatically.',
   manifest: '/manifest.json',
   icons: {
-    icon: '/icon-192.png',
-    apple: '/icon-512.png',
+    icon: '/favicon.png',
+    apple: '/favicon.png',
   },
   appleWebApp: {
     capable: true,
